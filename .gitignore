@@ -1,0 +1,13 @@
+# Flutter/Dart-specific ignores
+.dart_tool/
+.packages
+.pub/
+build/
+.idea/
+android/.gradle/
+*.iml
+pubspec.lock
+.flutter-plugins
+.flutter-plugins-dependencies
+.melos_tool/
+*.log
