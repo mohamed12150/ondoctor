@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ondoctor/Login_page.dart';
 
-import 'Screens.dart';
 
 void main() {
   runApp(const MyApp());
