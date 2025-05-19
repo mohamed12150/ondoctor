@@ -37,6 +37,7 @@ dependencies:
   flutter_svg: ^2.1.0
   gap: ^3.0.1
   animate_do: ^4.2.0
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
