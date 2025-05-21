@@ -1,7 +1,10 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 
 import 'package:ondoctor/Screens/Auth/Login_page.dart';
+import 'package:ondoctor/about.dart/Privacy%20Policy.dart';
+import 'package:ondoctor/about.dart/Terms%20and%20Conditions.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -50,7 +53,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple[700],
+                    color: Colors.deepPurple,
                   ),
                 ),
               ),
@@ -104,11 +107,48 @@ class _SignUpPageState extends State<SignUpPage> {
                       onChanged: (val) => setState(() => _agreeToTerms = val!),
                     ),
                     Expanded(
-                      child: Text(
-                        "I agree to the Terms and Conditions and Privacy Policy.",
-                        style: TextStyle(fontSize: 13),
-                      ),
-                    ),
+  child: RichText(
+    text: TextSpan(
+      text: 'I agree to the ',
+      style: TextStyle(fontSize: 13, color: Colors.black),
+      children: [
+        TextSpan(
+          text: 'Terms and Conditions',
+          style: TextStyle(
+            color: Colors.deepPurple,
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              // افتح صفحة الشروط
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TermsPage()),
+              );
+            },
+        ),
+        TextSpan(text: ' and '),
+        TextSpan(
+          text: ' Privacy Policy',
+          style: TextStyle(
+            color: Colors.deepPurple,
+            decoration: TextDecoration.underline,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () {
+              // افتح صفحة الخصوصية
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PrivacyPage()),
+              );
+            },
+        ),
+        TextSpan(text: '.'),
+      ],
+    ),
+  ),
+),
+
                   ],
                 ),
               ),
@@ -129,7 +169,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       : null,
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 45),
-                    backgroundColor: Colors.purple,
+                    backgroundColor: Colors.deepPurple,
                   ),
                   child: Text(
                     "Create Account",
@@ -162,7 +202,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: Text(
                           " Login",
                           style: TextStyle(
-                            color: Colors.purple,
+                            color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),

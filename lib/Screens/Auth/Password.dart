@@ -38,7 +38,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   style: TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
-                    color: Colors.purple[700],
+                    color: Colors.deepPurple,
                   ),
                 ),
               ),
@@ -87,7 +87,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(double.infinity, 45),
-                    backgroundColor: Colors.purple,
+                    backgroundColor: Colors.deepPurple,
                   ),
                   child: Text(
                     "Send Reset Link",
@@ -119,7 +119,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         child: Text(
                           " Login",
                           style: TextStyle(
-                            color: Colors.purple,
+                            color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
                           ),

@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:ondoctor/Screens/all_doctors_page.dart';
-import 'category_page.dart'; // تأكد من المسار الصحيح حسب مشروعك
+import 'package:flutter_svg/flutter_svg.dart';
+
+import 'package:ondoctor/Screens/appointments_screen.dart';
+import 'package:ondoctor/Screens/doctor_details_page.dart' as details;
+import 'package:ondoctor/Screens/list_doctors.dart';
+import 'package:ondoctor/Screens/messages/listchat.dart';
+import 'package:ondoctor/Screens/profile_screen.dart';
+import 'package:ondoctor/category_item.dart';
+import 'package:ondoctor/doctor_card.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -17,14 +24,14 @@ class _HomeState extends State<Home> {
     Icons.home,
     Icons.calendar_today,
     Icons.chat,
-    Icons.settings,
+    Icons.person,
   ];
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const Center(child: Text("Appointments")),
-    const Center(child: Text("Messages")),
-    const Center(child: Text("Settings")),
+    const AppointmentPage(),
+    ChatListScreen(),
+    const ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -37,55 +44,111 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        transitionBuilder: (child, animation) {
-          return FadeTransition(opacity: animation, child: child);
-        },
-        child: _screens[_selectedIndex],
-      ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.only(bottom: 16, left: 16, right: 17),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.purple.withOpacity(0.1),
-                blurRadius: 10,
-              ),
-            ],
+      body: Stack(
+        children: [
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+            child: _screens[_selectedIndex],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(30),
-            child: BottomNavigationBar(
-              currentIndex: _selectedIndex,
-              onTap: _onItemTapped,
-              backgroundColor: Colors.grey[190],
-              selectedFontSize: 0,
-              elevation: 0,
-              type: BottomNavigationBarType.fixed,
-              selectedItemColor: Colors.purple,
-              unselectedItemColor: Colors.black45,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-              items: _icons
-                  .map((icon) => BottomNavigationBarItem(
-                        icon: Icon(icon),
-                        label: '',
-                      ))
-                  .toList(),
+          Positioned(
+            left: 30,
+            right: 24,
+            bottom: 16,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(90),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.07),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(vertical: 15),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: List.generate(_icons.length, (index) {
+                  final isSelected = _selectedIndex == index;
+                  return GestureDetector(
+                    onTap: () => _onItemTapped(index),
+                    behavior: HitTestBehavior.translucent,
+                    child: Icon(
+                      _icons[index],
+                      color: isSelected
+                          ? Colors.blue.shade700
+                          : Colors.grey.shade400,
+                      size: isSelected ? 30 : 24,
+                    ),
+                  );
+                }),
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  // بيانات الأطباء
+  final List<Map<String, dynamic>> doctors = [
+    {
+      "name": "Dr. Amelia Emma",
+      "specialty": "Gynecologist",
+      "rating": 4.9,
+      "price": "\$25/hr",
+    },
+    {
+      "name": "Dr. Daniel Jack",
+      "specialty": "Neurologist",
+      "rating": 4.7,
+      "price": "\$30/hr",
+    },
+  ];
+
+  // نسخة من الأطباء لعرضها مع إمكانية الفلترة
+  late List<Map<String, dynamic>> filteredDoctors;
+
+  // للتحكم في TextField
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    filteredDoctors = doctors;
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _onSearchChanged() {
+    String searchText = _searchController.text.toLowerCase();
+
+    setState(() {
+      filteredDoctors = doctors.where((doctor) {
+        final nameLower = doctor["name"].toLowerCase();
+        final specialtyLower = doctor["specialty"].toLowerCase();
+        return nameLower.contains(searchText) || specialtyLower.contains(searchText);
+      }).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,37 +163,46 @@ class HomeScreen extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text("Hello, Rakib", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.purple)),
+                    Text(
+                      "Hello, Rakib",
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
                     SizedBox(height: 5),
-                    Text("Welcome Back", style: TextStyle(color: Colors.grey)),
                   ],
                 ),
-                CircleAvatar(
-                  radius: 24,
-                  backgroundImage: AssetImage("assets/images/user_profile.jpg"),
-                ),
+                const Icon(Icons.notifications_active_outlined,
+                    size: 30, color: Colors.black54),
               ],
             ),
             const SizedBox(height: 20),
 
-            // مربع البحث بعد التعديل
+            // مربع البحث 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Color(0xFFF5F5F5),
+                color: const Color.fromARGB(255, 253, 252, 252),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.purple.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 6),
+                    color: const Color.fromARGB(255, 128, 104, 170).withOpacity(0.1),
+                    blurRadius: 1,
+                    offset: const Offset(0, 5),
                   ),
                 ],
-                border: Border.all(color: Colors.purple[100]!),
+                border: Border.all(color: Colors.black),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  icon: Icon(Icons.search, color: Colors.purple),
+              child: TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  icon: Icon(
+                    Icons.search,
+                    color: Color.fromARGB(255, 90, 34, 187),
+                  ),
                   hintText: "Search",
                   hintStyle: TextStyle(color: Colors.grey),
                   border: InputBorder.none,
@@ -139,61 +211,144 @@ class HomeScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 20),
-
-            // الأقسام مع التنقل
-            const Text("Departments", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Departments",
+                  style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  DoctorsListPage()),
+                    );
+                   
+                  },
+                  child: Text(
+                    "See All",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
             SizedBox(
-              height: 90,
+              height: 95,
               child: ListView(
                 scrollDirection: Axis.horizontal,
-                children: const [
-                  CategoryItem(title: "Cardiology", icon: Icons.favorite),
-                  CategoryItem(title: "Neurology", icon: Icons.memory),
-                  CategoryItem(title: "Dentistry", icon: Icons.medical_services),
-                  CategoryItem(title: "Radiology", icon: Icons.scanner),
-                  CategoryItem(title: "Ophthalmology", icon: Icons.visibility),
+                padding: const EdgeInsets.symmetric(horizontal: 2),
+                children: [
+                  CategoryItem(
+                    title: "Cardiology",
+                    iconWidget: SvgPicture.asset(
+                      "assets/images/icons8-cardiology-48.svg",
+                      height: 30,
+                      width: 30,
+                    ),
+                    routeName: '/Cardiology',
+                  ),
+                  CategoryItem(
+                      title: "Neurology",
+                      iconWidget: SvgPicture.asset(
+                        "assets/images/icons8-neurology-32.svg",
+                        height: 30,
+                        width: 30,
+                      ),
+                      routeName: "/neurology"),
+                  CategoryItem(
+                      title: "Dentistry",
+                      iconWidget: SvgPicture.asset(
+                        "assets/images/dentist-svgrepo-com.svg",
+                        colorFilter: const ColorFilter.mode(
+                            Colors.purple, BlendMode.srcIn),
+                        height: 30,
+                        width: 30,
+                      ),
+                      routeName: "/dentistry"),
+                  CategoryItem(
+                      title: "Radiology",
+                      iconWidget: SvgPicture.asset(
+                        "assets/images/icons8-ultrasound-machine-100.svg",
+                        height: 30,
+                        width: 30,
+                      ),
+                      routeName: "/radiology"),
+                  CategoryItem(
+                      title: "Ophthalmology",
+                      iconWidget: SvgPicture.asset(
+                        "assets/images/icons8-ophthalmology-100.svg",
+                        height: 30,
+                        width: 30,
+                      ),
+                      routeName: "/ophthalmology"),
                 ],
               ),
             ),
 
             const SizedBox(height: 30),
-            const Text("Upcoming Schedule (3)", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            const Text(
+              "Upcoming Schedule",
+              style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900),
+            ),
             const SizedBox(height: 10),
-            _buildScheduleSlider(context),
+            _buildAutoScrollSchedule(),
 
             const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text("Popular Doctors", style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const Text(
+                  "Popular Doctors",
+                  style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900),
+                ),
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const AllDoctorsPage()),
+                      MaterialPageRoute(
+                          builder: (context) =>
+                               DoctorsListPage(
+                                
+                              )),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     "See All",
-                    style: TextStyle(color: Colors.purple),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 10),
 
-            const SizedBox(height: 10),
-            const DoctorCard(
-                name: "Dr. Amelia Emma",
-                specialty: "Gynecologist",
-                rating: 4.9,
-                price: "\$25/hr"),
-            const SizedBox(height: 10),
-            const DoctorCard(
-                name: "Dr. Daniel Jack",
-                specialty: "Neurologist",
-                rating: 4.7,
-                price: "\$30/hr"),
+            // عرض الأطباء حسب الفلترة
+            ...filteredDoctors.map((doctor) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: DoctorCard(
+                  name: doctor["name"],
+                  specialty: doctor["specialty"],
+                  rating: doctor["rating"],
+                  price: doctor["price"],
+                ),
+              );
+            }),
           ],
         ),
       ),
@@ -201,56 +356,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class CategoryItem extends StatelessWidget {
-  final String title;
-  final IconData icon;
-
-  const CategoryItem({super.key, required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => CategoryPage(category: title)));
-      },
-      child: Container(
-        margin: const EdgeInsets.only(right: 12),
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.1),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              )
-            ]),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: Colors.purple,
-              child: Icon(icon, size: 16, color: Colors.white),
-            ),
-            const SizedBox(height: 5),
-            Text(title,
-                style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-Widget _buildScheduleSlider(BuildContext context) {
+Widget _buildAutoScrollSchedule() {
   final List<Map<String, dynamic>> scheduleList = [
     {
       "name": "Prof. Dr. Logan Mason",
@@ -275,52 +381,89 @@ Widget _buildScheduleSlider(BuildContext context) {
     },
   ];
 
-  return CarouselSlider(
-    options: CarouselOptions(
-      height: 160,
-      enlargeCenterPage: true,
-      enableInfiniteScroll: false,
-      autoPlay: true,
-    ),
-    items: scheduleList.map((schedule) {
-      return Builder(
-        builder: (BuildContext context) {
-          return Container(
+  return SizedBox(
+    height: 150,
+    child: CarouselSlider.builder(
+      itemCount: scheduleList.length,
+      itemBuilder: (context, index, realIdx) {
+        final schedule = scheduleList[index];
+        return GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => details.DoctorDetailsPage(
+                  name: schedule["name"],
+                  specialty: schedule["specialty"],
+                  date: schedule["date"],
+                  rating: schedule["rating"].toDouble(),
+                  image: schedule["image"],
+                ),
+              ),
+            );
+          },
+          child: Container(
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.purple,
+              color: Colors.deepPurple,
               borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 5),
+                ),
+              ],
             ),
-            width: MediaQuery.of(context).size.width * 0.8,
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 30,
+                  radius: 35,
                   backgroundImage: AssetImage(schedule["image"]),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(schedule["name"],
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
-                      Text(schedule["specialty"],
-                          style: const TextStyle(color: Colors.white70)),
-                      const SizedBox(height: 5),
-                      Text(schedule["date"],
-                          style: const TextStyle(color: Colors.white)),
-                      const SizedBox(height: 5),
-                      Row(
+                      Text(
+                        schedule["name"],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        schedule["date"],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 4,
                         children: [
-                          const Icon(Icons.star,
-                              color: Colors.amber, size: 16),
-                          const SizedBox(width: 4),
-                          Text("${schedule["rating"]}",
-                              style: const TextStyle(color: Colors.white)),
+                          const Icon(Icons.star, color: Colors.amber, size: 18),
+                          Text(
+                            "${schedule["rating"]}",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.greenAccent,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
                         ],
                       ),
                     ],
@@ -328,71 +471,17 @@ Widget _buildScheduleSlider(BuildContext context) {
                 ),
               ],
             ),
-          );
-        },
-      );
-    }).toList(),
-  );
-}
-
-class DoctorCard extends StatelessWidget {
-  final String name;
-  final String specialty;
-  final double rating;
-  final String price;
-
-  const DoctorCard({
-    super.key,
-    required this.name,
-    required this.specialty,
-    required this.rating,
-    required this.price,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 6,
-              offset: const Offset(0, 3),
-            )
-          ]),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            backgroundImage: AssetImage("assets/images/a.jpg"),
-            radius: 30,
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-                Text(specialty, style: const TextStyle(color: Colors.grey)),
-                Row(
-                  children: [
-                    const Icon(Icons.star, color: Colors.orange, size: 16),
-                    Text("$rating (2345 Reviews)",
-                        style: const TextStyle(fontSize: 12)),
-                  ],
-                )
-              ],
-            ),
-          ),
-          Text(price,
-              style: const TextStyle(
-                  color: Colors.green, fontWeight: FontWeight.bold)),
-        ],
+        );
+      },
+      options: CarouselOptions(
+        height: 150,
+        autoPlay: true,
+        autoPlayInterval: const Duration(seconds: 3),
+        enlargeCenterPage: true,
+        viewportFraction: 0.90,
+        scrollDirection: Axis.vertical,
       ),
-    );
-  }
+    ),
+  );
 }

@@ -23,7 +23,7 @@ class DoctorCard extends StatelessWidget {
       child: Row(
         children: [
           const CircleAvatar(
-            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+            backgroundImage: AssetImage('assets/images/a.jpg'),
             radius: 30,
           ),
           const SizedBox(width: 12),
@@ -47,7 +47,7 @@ class DoctorCard extends StatelessWidget {
           ),
           Text(price,
               style: const TextStyle(
-                  color: Colors.green, fontWeight: FontWeight.bold)),
+                  color: Colors.green, fontWeight: FontWeight.normal)),
         ],
       ),
     );

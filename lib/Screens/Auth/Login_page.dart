@@ -115,14 +115,14 @@ class _LoginPageState extends State<LoginPage> {
                       onTap: () {
                              Navigator.pushReplacement(
   context,
-  MaterialPageRoute(builder: (context) => const Home()),);
+  MaterialPageRoute(builder: (context) => const HomeScreen()),);
                         },
                  
                       child: Container(
                         height: 45,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20),
-                          color: Colors.purple,
+                          color: Colors.deepPurple,
                         ),
                         child: Center(
                           child: Text(
@@ -208,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: Text(
                           " Sign Up",
                           style: TextStyle(
-                            color: Colors.purple,
+                            color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),

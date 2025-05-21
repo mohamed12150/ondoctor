@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AllDoctorsPage extends StatelessWidget {
-  const AllDoctorsPage({super.key});
+  final String department;
+
+  const AllDoctorsPage({super.key, required this.department});
 
   @override
   Widget build(BuildContext context) {
@@ -32,37 +34,48 @@ class AllDoctorsPage extends StatelessWidget {
       },
     ];
 
+    final filteredDoctors = doctors.where((doc) {
+      final specialty = doc["specialty"].toString().toLowerCase();
+      final departmentLower = department.toLowerCase();
+      return specialty.contains(departmentLower) || departmentLower.contains(specialty);
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("All Doctors"),
+        title: Text("$department Doctors"),
         backgroundColor: Colors.purple,
       ),
-      body: ListView.builder(
-        itemCount: doctors.length,
-        itemBuilder: (context, index) {
-          final doctor = doctors[index];
-          return ListTile(
-            leading: const CircleAvatar(
-              backgroundImage: AssetImage("assets/images/a.jpg"),
+      body: filteredDoctors.isEmpty
+          ? const Center(child: Text("No doctors available in this department."))
+          : ListView.builder(
+              itemCount: filteredDoctors.length,
+              itemBuilder: (context, index) {
+                final doctor = filteredDoctors[index];
+                return ListTile(
+                  leading: const CircleAvatar(
+                    backgroundImage: AssetImage("assets/images/a.jpg"),
+                  ),
+                  title: Text(doctor["name"]),
+                  subtitle: Text(doctor["specialty"]),
+                  trailing: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(doctor["price"],
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.green)),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star,
+                              color: Colors.orange, size: 14),
+                          Text("${doctor["rating"]}"),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
-            title: Text(doctor["name"]),
-            subtitle: Text(doctor["specialty"]),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(doctor["price"], style: const TextStyle(color: Colors.green)),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.star, color: Colors.orange, size: 14),
-                    Text("${doctor["rating"]}"),
-                  ],
-                ),
-              ],
-            ),
-          );
-        },
-      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// صفحة تفاصيل الدكتور (الكود اللي أرسلته أنت)
 class DoctorDetailsPage extends StatefulWidget {
   final String name;
   final String specialty;
@@ -23,11 +24,11 @@ class DoctorDetailsPage extends StatefulWidget {
 class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
   String? selectedSlot;
   bool isFavorite = false;
-  bool isBooking = false;  // حالة التحميل عند الضغط على الحجز
+  bool isBooking = false;
 
   @override
   Widget build(BuildContext context) {
-    final royalPurple = Color(0xFF6A0DAD); // Royal Purple
+    final royalPurple = Color(0xFF6A0DAD);
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -35,7 +36,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         title: Text(
           "Specialist Details",
           style: TextStyle(
-            color: Colors.black, 
+            color: Colors.black,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
@@ -64,7 +65,6 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // تعديل هنا: صف أفقي للصورة والبيانات
             Row(
               children: [
                 Container(
@@ -84,9 +84,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                     radius: 50,
                   ),
                 ),
-
                 SizedBox(width: 16),
-
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,9 +126,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 ),
               ],
             ),
-
             SizedBox(height: 24),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -139,23 +135,20 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 _infoCard("4.9", "Rating", royalPurple),
               ],
             ),
-
             SizedBox(height: 35),
-
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Morning Slots",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,  
+                    color: Colors.black,
                     fontSize: 16),
               ),
             ),
-
             SizedBox(height: 10),
             Wrap(
-              spacing: 16,  // مسافة أفقية أقل شوي
+              spacing: 16,
               runSpacing: 10,
               children: [
                 _slotButton("10:00 AM", royalPurple),
@@ -164,20 +157,17 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 _slotButton("11:30 AM", royalPurple),
               ],
             ),
-
             SizedBox(height: 22),
-
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Afternoon Slots",
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,  
+                    color: Colors.black,
                     fontSize: 16),
               ),
             ),
-
             SizedBox(height: 10),
             Wrap(
               spacing: 16,
@@ -188,9 +178,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 _slotButton("4:00 PM", royalPurple),
               ],
             ),
-
             SizedBox(height: 35),
-
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -227,9 +215,7 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                 ],
               ),
             ),
-
             SizedBox(height: 35),
-
             ElevatedButton(
               onPressed: selectedSlot == null || isBooking
                   ? null
@@ -309,7 +295,6 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                       style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
             ),
-
             SizedBox(height: 20),
           ],
         ),
@@ -387,6 +372,80 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
             fontSize: 15,
           ),
         ),
+      ),
+    );
+  }
+}
+
+// صفحة اللسته 
+class DoctorsListPage extends StatelessWidget {
+  final List<Map<String, dynamic>> doctors = [
+    {
+      "name": "Dr. Amelia Emma",
+      "specialty": "Gynecologist",
+      "image": "assets/images/a.jpg",
+      "date": "10 April 2025",
+      "rating": 4.7,
+    },
+    {
+      "name": "Dr. Daniel Jack",
+      "specialty": "Neurologist",
+      "image": "assets/images/a.jpg",
+      "date": "11 April 2025",
+      "rating": 4.5,
+    },
+    {
+      "name": "Dr. Sarah Connor",
+      "specialty": "Cardiologist",
+      "image": "assets/images/a.jpg",
+      "date": "12 April 2025",
+      "rating": 4.8,
+    },
+    {
+      "name": "Dr. Logan Mason",
+      "specialty": "Dentist",
+      "image": "assets/images/a.jpg",
+      "date": "13 April 2025",
+      "rating": 4.6,
+    },
+  ];
+
+  DoctorsListPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Doctors List"),
+        backgroundColor: Colors.deepPurple,
+      ),
+      body: ListView.builder(
+        itemCount: doctors.length,
+        itemBuilder: (context, index) {
+          final doctor = doctors[index];
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: AssetImage(doctor["image"]),
+            ),
+            title: Text(doctor["name"]),
+            subtitle: Text(doctor["specialty"]),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DoctorDetailsPage(
+                    name: doctor["name"],
+                    specialty: doctor["specialty"],
+                    date: doctor["date"],
+                    rating: doctor["rating"],
+                    image: doctor["image"],
+                  ),
+                ),
+              );
+            },
+          );
+        },
       ),
     );
   }
