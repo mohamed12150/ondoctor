@@ -2,6 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+
+
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,11 +17,24 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final String userName = 'Rakib Ahmed';
-  final String userEmail = 'rakib@email.com';
+  String? userName;
+  String? email;
+  @override
+  @override
+  void initState() {
+    super.initState();
+    loadUserData();
+  }
 
   File? _profileImage;
 
+  Future<void> loadUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName') ?? '';
+      email = prefs.getString('email') ?? '';
+    });
+  }
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -50,13 +69,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('لا'),
           ),
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // إغلاق الرسالة
-              // هنا تضع عملية تسجيل الخروج، حالياً مجرد مثال:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('تم تسجيل الخروج')),
+            onPressed: () async  {
+              Navigator.of(context).pop();
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.remove('token');      // حذف التوكن
+              await prefs.remove('userName');
+              await prefs.remove('email'); //
+              Get.snackbar(
+              'تم تسجيل الخروج',
+              'يرجى تسجيل الدخول مرة أخرى',
+              colorText: Colors.black,
               );
-            },
+
+              Get.offAllNamed('/login'); // توجيه لصفحة تسجيل الدخول
+              },
+
             child: const Text('نعم'),
           ),
         ],
@@ -160,8 +187,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                userName,
-                                style: const TextStyle(
+                          (userName != null && userName!.isNotEmpty) ? userName! : 'اسم المستخدم',
+
+                          style: const TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.white,
@@ -169,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                userEmail,
+                                (email ?? '').isNotEmpty ? email! : 'البريد الإلكتروني',
                                 style: const TextStyle(
                                   fontSize: 14,
                                   color: Colors.grey,

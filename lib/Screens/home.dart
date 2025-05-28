@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart'; // أضف هذه المكتبة
 import 'package:ondoctor/Screens/appointments_screen.dart';
 import 'package:ondoctor/Screens/doctor_details_page.dart' as details;
 import 'package:ondoctor/Screens/list_doctors.dart';
 import 'package:ondoctor/Screens/messages/listchat.dart';
 import 'package:ondoctor/Screens/profile_screen.dart';
-import 'package:ondoctor/category_item.dart';
-import 'package:ondoctor/doctor_card.dart';
+import 'package:ondoctor/widgets//category_item2.dart';
+import 'package:ondoctor/Screens/doctor_card.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:card_swiper/card_swiper.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -34,11 +39,28 @@ class _HomeState extends State<Home> {
     const ProfileScreen(),
   ];
 
-  void _onItemTapped(int index) {
+  void _onItemTapped(int index) async {
+    if (index == 3 || index == 1 || index == 2) {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null || token.isEmpty) {
+        // لو ما مسجل دخول
+        Get.snackbar("تنبيه", "يجب تسجيل الدخول أولاً",
+            backgroundColor: Colors.red.shade100,
+            colorText: Colors.black,
+            duration: const Duration(seconds: 2));
+
+        Get.toNamed('/login'); // استخدم الراوت المناسب لي صفحة تسجيل الدخول
+        return;
+      }
+    }
+
     setState(() {
       _selectedIndex = index;
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,10 +139,17 @@ class _HomeScreenState extends State<HomeScreen> {
       "rating": 4.7,
       "price": "\$30/hr",
     },
+    {
+      "name": "Dr. Daniel Jack",
+      "specialty": "Neurologist",
+      "rating": 4.7,
+      "price": "\$30/hr",
+    },
   ];
 
   // نسخة من الأطباء لعرضها مع إمكانية الفلترة
   late List<Map<String, dynamic>> filteredDoctors;
+  String userName = ''; // ✅ لعرض اسم المستخدم
 
   // للتحكم في TextField
   final TextEditingController _searchController = TextEditingController();
@@ -130,6 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     filteredDoctors = doctors;
     _searchController.addListener(_onSearchChanged);
+    loadUserName();
+
   }
 
   @override
@@ -149,6 +180,13 @@ class _HomeScreenState extends State<HomeScreen> {
       }).toList();
     });
   }
+  void loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('userName') ?? '';
+    });
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,17 +200,17 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children:  [
+
                     Text(
-                      "Hello, Rakib",
-                      style: TextStyle(
+                      userName.isNotEmpty ? "Hello, $userName" : "Hello",
+                      style: const TextStyle(
                         fontSize: 26,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
-                        letterSpacing: 0.4,
                       ),
                     ),
-                    SizedBox(height: 5),
+                    const SizedBox(height: 5),
                   ],
                 ),
                 const Icon(Icons.notifications_active_outlined,
@@ -181,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 20),
 
-            // مربع البحث 
+            // مربع البحث
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
@@ -228,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       MaterialPageRoute(
                           builder: (context) =>  DoctorsListPage()),
                     );
-                   
+
                   },
                   child: Text(
                     "See All",
@@ -302,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   fontWeight: FontWeight.w900),
             ),
             const SizedBox(height: 10),
-            _buildAutoScrollSchedule(),
+            buildStackedVerticalCards(), // ✅ هذا هو الويدجت الصحيح
 
             const SizedBox(height: 30),
             Row(
@@ -321,8 +359,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       context,
                       MaterialPageRoute(
                           builder: (context) =>
-                               DoctorsListPage(
-                                
+                              DoctorsListPage(
+
                               )),
                     );
                   },
@@ -356,132 +394,135 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-Widget _buildAutoScrollSchedule() {
+
+
+
+
+Widget buildStackedVerticalCards() {
   final List<Map<String, dynamic>> scheduleList = [
     {
       "name": "Prof. Dr. Logan Mason",
       "specialty": "Dentist",
       "date": "June 12, 9:30 AM",
-      "rating": 4.9,
       "image": "assets/images/a.jpg"
     },
     {
       "name": "Dr. Sarah Connor",
       "specialty": "Cardiologist",
       "date": "June 15, 11:00 AM",
-      "rating": 4.8,
       "image": "assets/images/a.jpg"
     },
     {
-      "name": "Dr. John Smith",
+      "name": "Dr. Ahmed",
       "specialty": "Neurologist",
       "date": "June 18, 2:00 PM",
-      "rating": 4.7,
       "image": "assets/images/a.jpg"
     },
   ];
 
   return SizedBox(
-    height: 150,
-    child: CarouselSlider.builder(
+    height: 220, // زيادة الارتفاع لعرض جزء من البطاقة التالية
+    child: Swiper(
       itemCount: scheduleList.length,
-      itemBuilder: (context, index, realIdx) {
-        final schedule = scheduleList[index];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => details.DoctorDetailsPage(
-                  name: schedule["name"],
-                  specialty: schedule["specialty"],
-                  date: schedule["date"],
-                  rating: schedule["rating"].toDouble(),
-                  image: schedule["image"],
-                ),
-              ),
-            );
-          },
-          child: Container(
-            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.deepPurple,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 5),
-                ),
-              ],
+      itemWidth: MediaQueryData.fromWindow(WidgetsBinding.instance.window).size.width * 0.9,
+      itemHeight: 180,
+      layout: SwiperLayout.STACK,
+      scrollDirection: Axis.vertical,
+      loop: true,
+      duration: 600,
+      viewportFraction: 0.65, // لتقليل المساحة المحتلة لكل كرت وإظهار جزء من الكرت الذي يليه
+      scale: 0.85, // تقليل حجم الكروت الخلفية لإعطاء إحساس بالعمق
+      itemBuilder: (context, index) {
+        return buildScheduleCard(scheduleList[index]);
+      },
+    ),
+  );
+}
+
+Widget buildScheduleCard(Map<String, dynamic> schedule) {
+  final dateParts = schedule["date"].split(', ');
+  final date = dateParts[0];
+  final time = dateParts.length > 1 ? dateParts[1] : '';
+
+  return Container(
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.purple.shade600, Colors.purpleAccent.shade100],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(20),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.pink.withOpacity(0.3),
+          blurRadius: 10,
+          offset: const Offset(0, 5),
+        ),
+      ],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            CircleAvatar(
+              radius: 24,
+              backgroundImage: AssetImage(schedule["image"]),
             ),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 35,
-                  backgroundImage: AssetImage(schedule["image"]),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        schedule["name"],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(schedule["name"],
+                      style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        schedule["date"],
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Wrap(
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        spacing: 4,
-                        children: [
-                          const Icon(Icons.star, color: Colors.amber, size: 18),
-                          Text(
-                            "${schedule["rating"]}",
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Colors.greenAccent,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                          fontSize: 16)),
+                  Text(schedule["specialty"],
+                      style: const TextStyle(
+                          color: Colors.white70, fontSize: 13)),
+                ],
+              ),
             ),
-          ),
-        );
-      },
-      options: CarouselOptions(
-        height: 150,
-        autoPlay: true,
-        autoPlayInterval: const Duration(seconds: 3),
-        enlargeCenterPage: true,
-        viewportFraction: 0.90,
-        scrollDirection: Axis.vertical,
-      ),
+            const Icon(Icons.mark_unread_chat_alt_outlined, color: Colors.white70),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,           // مثل justify-content: center;
+
+          children: [
+            buildDatePill(Icons.calendar_today, date),
+            buildDatePill(Icons.calendar_today, date),
+            if (time.isNotEmpty) ...[
+              const SizedBox(width: 1),
+              buildDatePill(Icons.access_time, time),
+            ]
+          ],
+
+        ),
+      ],
+    ),
+  );
+}
+
+Widget buildDatePill(IconData icon, String text) {
+  return Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+    decoration: BoxDecoration(
+      color: Colors.white.withOpacity(0.15),
+      borderRadius: BorderRadius.circular(30),
+    ),
+    child: Row(
+      children: [
+        Icon(icon, color: Colors.white, size: 16),
+        const SizedBox(width: 6),
+        Text(text,
+            style: const TextStyle(color: Colors.white, fontSize: 13)),
+      ],
     ),
   );
 }

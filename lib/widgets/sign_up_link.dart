@@ -1,6 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:ondoctor/Screens/Auth/sigin%20up.dart';
+import 'package:ondoctor/Screens/Auth/siginup.dart';
 
 
 class SignUpLink extends StatelessWidget {

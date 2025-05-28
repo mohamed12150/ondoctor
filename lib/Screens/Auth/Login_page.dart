@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:get/get.dart';
+import 'package:ondoctor/controllers/auth_controller.dart';
 
 import 'package:ondoctor/Screens/Auth/Password.dart';
-import 'package:ondoctor/Screens/Auth/sigin%20up.dart';
+import 'package:ondoctor/Screens/Auth/siginup.dart';
 import 'package:ondoctor/Screens/home.dart';
 
 
@@ -14,6 +16,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final authController = Get.put(AuthController());
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             child: TextField(
+                              controller:emailController,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: "Email or Phone number",
@@ -76,6 +84,8 @@ class _LoginPageState extends State<LoginPage> {
                           Container(
                             padding: EdgeInsets.all(1.0),
                             child: TextField(
+                              controller: passwordController, // ✅
+
                               obscureText: true,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
@@ -107,17 +117,20 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                  ),),
+                  ),), //forget you password
                   SizedBox(height: 10),
                   FadeInUp(
                     duration: Duration(milliseconds: 1900),
                     child: GestureDetector(
                       onTap: () {
-                             Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (context) => const HomeScreen()),);
-                        },
-                 
+                        final email = emailController.text.trim();
+                        final password = passwordController.text.trim();
+                        if (email.isNotEmpty && password.isNotEmpty) {
+                          authController.login(email, password);
+                        } else {
+                          Get.snackbar("Error", "Please fill in all fields");
+                        }
+                      },
                       child: Container(
                         height: 45,
                         decoration: BoxDecoration(
@@ -130,13 +143,14 @@ class _LoginPageState extends State<LoginPage> {
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16
+                              fontSize: 16,
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
+
                   SizedBox(height: 10),
                   FadeInUp(
                     duration: Duration(milliseconds: 2000),

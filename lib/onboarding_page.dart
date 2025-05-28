@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ondoctor/Screens/Auth/sigin%20up.dart';
+import 'package:get/get.dart';
+import 'package:ondoctor/Screens/Auth/siginup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingPage extends StatefulWidget {
@@ -30,13 +31,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
   ];
 
   void _finishOnboarding() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("onboarding_done", true);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => SignUpPage()),
-    );
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("seen", true); // نستخدم نفس المفتاح اللي استخدمناه في main.dart
+
+    Get.offAllNamed('/home'); // أو: Get.offAll(() => Home());
   }
+
 
   @override
   Widget build(BuildContext context) {
