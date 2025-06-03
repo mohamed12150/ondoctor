@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 class CategoryPage extends StatelessWidget {
-  final String category;
+  final String categoryId;
+  final String categoryName;
 
-  const CategoryPage({super.key, required this.category});
+  const CategoryPage({
+    super.key,
+    required this.categoryId,
+    required this.categoryName,
+  });
 
   // بيانات الأطباء حسب القسم
   List<Map<String, dynamic>> getDoctorsForCategory(String category) {
@@ -36,12 +41,12 @@ class CategoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final doctors = getDoctorsForCategory(category);
+    final doctors = getDoctorsForCategory(categoryName);
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.purple,
-        title: Text(category),
+        title: Text(categoryName),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

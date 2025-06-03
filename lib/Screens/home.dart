@@ -4,16 +4,21 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart'; // أضف هذه المكتبة
+import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ondoctor/Screens/appointments_screen.dart';
 import 'package:ondoctor/Screens/doctor_details_page.dart' as details;
+import 'package:ondoctor/Screens/doctor_details_page.dart';
 import 'package:ondoctor/Screens/list_doctors.dart';
 import 'package:ondoctor/Screens/messages/listchat.dart';
 import 'package:ondoctor/Screens/profile_screen.dart';
-import 'package:ondoctor/widgets//category_item2.dart';
+import 'package:ondoctor/widgets//category_item.dart';
 import 'package:ondoctor/Screens/doctor_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:card_swiper/card_swiper.dart';
+import '../controllers/doctor_controller.dart';
+import '../models/category_model.dart';
+import '../controllers/category_controller.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -61,7 +66,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-
+// bottom navgtion bar
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +107,7 @@ class _HomeState extends State<Home> {
                     child: Icon(
                       _icons[index],
                       color: isSelected
-                          ? Colors.blue.shade700
+                          ? Colors.purple.shade700
                           : Colors.grey.shade400,
                       size: isSelected ? 30 : 24,
                     ),
@@ -160,6 +165,8 @@ class _HomeScreenState extends State<HomeScreen> {
     filteredDoctors = doctors;
     _searchController.addListener(_onSearchChanged);
     loadUserName();
+    // إذا ما عندك Binding تلقائي
+
 
   }
 
@@ -168,6 +175,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchController.dispose();
     super.dispose();
   }
+  final CategoryController categoryController = Get.put(CategoryController());
+  final doctorController = Get.put(DoctorController());
+
 
   void _onSearchChanged() {
     String searchText = _searchController.text.toLowerCase();
@@ -264,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>  DoctorsListPage()),
+                          builder: (context) =>  DoctorsListPage(doctors: [],)),
                     );
 
                   },
@@ -278,58 +288,56 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              height: 95,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 2),
-                children: [
-                  CategoryItem(
-                    title: "Cardiology",
-                    iconWidget: SvgPicture.asset(
-                      "assets/images/icons8-cardiology-48.svg",
-                      height: 30,
-                      width: 30,
-                    ),
-                    routeName: '/Cardiology',
-                  ),
-                  CategoryItem(
-                      title: "Neurology",
-                      iconWidget: SvgPicture.asset(
-                        "assets/images/icons8-neurology-32.svg",
+            Obx(() {
+              if (categoryController.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (categoryController.categories.isEmpty) {
+                return const Center(child: Text("لا توجد تصنيفات متاحة"));
+              }
+
+              return SizedBox(
+                height: 100,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categoryController.categories.length,
+                  itemBuilder: (context, index) {
+                    final category = categoryController.categories[index];
+
+                    return CategoryItem(
+                      title: category.name,
+                      iconWidget:Image.network(
+                        category.iconUrl,
                         height: 30,
                         width: 30,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const SizedBox(
+                            height: 30,
+                            width: 30,
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        },
+                        errorBuilder: (_, __, ___) => const Icon(Icons.category),
                       ),
-                      routeName: "/neurology"),
-                  CategoryItem(
-                      title: "Dentistry",
-                      iconWidget: SvgPicture.asset(
-                        "assets/images/dentist-svgrepo-com.svg",
-                        colorFilter: const ColorFilter.mode(
-                            Colors.purple, BlendMode.srcIn),
-                        height: 30,
-                        width: 30,
-                      ),
-                      routeName: "/dentistry"),
-                  CategoryItem(
-                      title: "Radiology",
-                      iconWidget: SvgPicture.asset(
-                        "assets/images/icons8-ultrasound-machine-100.svg",
-                        height: 30,
-                        width: 30,
-                      ),
-                      routeName: "/radiology"),
-                  CategoryItem(
-                      title: "Ophthalmology",
-                      iconWidget: SvgPicture.asset(
-                        "assets/images/icons8-ophthalmology-100.svg",
-                        height: 30,
-                        width: 30,
-                      ),
-                      routeName: "/ophthalmology"),
-                ],
-              ),
-            ),
+                      onTap: () {
+                        print('Category Tapped: id=${category.id}, name=${category.name}, iconUrl=${category.iconUrl}');
+
+                        // Get.toNamed('/categories', arguments: {
+                        //   'id': category.id,
+                        //   'name': category.name,
+                        // });
+                      },
+
+                    );
+                  },
+                ),
+              );
+            }),
 
             const SizedBox(height: 30),
             const Text(
@@ -355,40 +363,49 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              DoctorsListPage(
-
-                              )),
-                    );
+                    Get.to(() => DoctorsListPage(
+                      doctors: doctorController.filteredDoctors,
+                    ));
                   },
                   child: Text(
                     "See All",
                     style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple),
+                      fontWeight: FontWeight.bold,
+                      color: Colors.purple,
+                    ),
                   ),
                 ),
+
+
               ],
             ),
             const SizedBox(height: 10),
 
             // عرض الأطباء حسب الفلترة
-            ...filteredDoctors.map((doctor) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 10),
-                child: DoctorCard(
-                  name: doctor["name"],
-                  specialty: doctor["specialty"],
-                  rating: doctor["rating"],
-                  price: doctor["price"],
-                ),
+
+
+            Obx(() {
+              return Column(
+                children: doctorController.filteredDoctors.map((doctor) {
+                  return GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/appointment', arguments: doctor);
+                    },
+                    child: DoctorCard(doctor: doctor),
+                  );
+                }).toList(),
               );
-            }),
-          ],
-        ),
+            })
+
+
+
+
+
+
+
+
+
+          ]),
       ),
     );
   }
@@ -487,7 +504,8 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
                 ],
               ),
             ),
-            const Icon(Icons.mark_unread_chat_alt_outlined, color: Colors.white70),
+            const Icon(LucideIcons.messageCircle, color: Colors.white70),
+
           ],
         ),
         const SizedBox(height: 20),

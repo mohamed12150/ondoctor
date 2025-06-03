@@ -1,451 +1,395 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../models/doctor_model.dart';
+import '../controllers/doctor_list_controller.dart';
+import 'doctor_details_page.dart';
 
-// صفحة تفاصيل الدكتور (الكود اللي أرسلته أنت)
-class DoctorDetailsPage extends StatefulWidget {
-  final String name;
-  final String specialty;
-  final String date;
-  final double rating;
-  final String image;
+class DoctorsListPage extends StatelessWidget {
+  final List<Doctor> doctors;
+  final DoctorListController controller = Get.put(DoctorListController());
 
-  const DoctorDetailsPage({
-    super.key,
-    required this.name,
-    required this.specialty,
-    required this.date,
-    required this.rating,
-    required this.image,
-  });
-
-  @override
-  State<DoctorDetailsPage> createState() => _DoctorDetailsPageState();
-}
-
-class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
-  String? selectedSlot;
-  bool isFavorite = false;
-  bool isBooking = false;
+  DoctorsListPage({super.key, required this.doctors}) {
+    controller.setDoctors(doctors);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final royalPurple = Color(0xFF6A0DAD);
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: Text(
-          "Specialist Details",
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          "قائمة الأطباء",
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.deepPurple,
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
-        backgroundColor: Colors.white,
-        elevation: 2,
-        iconTheme: IconThemeData(color: royalPurple),
+        centerTitle: true,
+        iconTheme: const IconThemeData(color: Colors.deepPurple),
         actions: [
           IconButton(
-            icon: Icon(
-              isFavorite ? Icons.favorite : Icons.favorite_border,
-              color: isFavorite ? Colors.red : Colors.grey.shade700,
-              size: 24,
-            ),
-            onPressed: () {
-              setState(() {
-                isFavorite = !isFavorite;
-              });
-            },
+            icon: const Icon(Icons.filter_list),
+            onPressed: () => _showAdvancedFilterDialog(context),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.15),
-                        blurRadius: 12,
-                        spreadRadius: 1,
-                        offset: Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    backgroundImage: AssetImage(widget.image),
-                    radius: 50,
-                  ),
+      body: Column(
+        children: [
+          // حقل البحث
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: "ابحث بالاسم أو التخصص...",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
-                SizedBox(width: 16),
-                Expanded(
+              ),
+              onChanged: (value) => controller.searchQuery.value = value,
+            ),
+          ),
+
+          // شريط الفلترة النشطة
+          Obx(() => controller.hasActiveFilters.value
+              ? _buildActiveFiltersBar()
+              : const SizedBox.shrink()),
+
+          // قائمة الأطباء
+          Expanded(
+            child: Obx(() {
+              final filteredDoctors = controller.filteredDoctors;
+
+              if (filteredDoctors.isEmpty) {
+                return Center(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        widget.name,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                      Image.asset("assets/images/no_results.jpg", height: 150),
+                      const SizedBox(height: 20),
+                      const Text(
+                        "لا يوجد أطباء مطابقين لبحثك",
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
-                      SizedBox(height: 4),
-                      Text(
-                        widget.specialty,
-                        style: TextStyle(color: Colors.grey.shade700, fontSize: 15),
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.star, color: Colors.amber, size: 22),
-                          SizedBox(width: 6),
-                          Text(
-                            "${widget.rating}",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: Colors.grey.shade800),
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            "(432 reviews)",
-                            style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                          ),
-                        ],
+                      const SizedBox(height: 10),
+                      TextButton(
+                        onPressed: controller.clearFilters,
+                        child: const Text("مسح الفلترة"),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _infoCard("2400+", "Patients", royalPurple),
-                _infoCard("7 yr+", "Experience", royalPurple),
-                _infoCard("4.9", "Rating", royalPurple),
-              ],
-            ),
-            SizedBox(height: 35),
-            Align(
-              alignment: Alignment.centerLeft,
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                itemCount: filteredDoctors.length,
+                itemBuilder: (context, index) {
+                  final doctor = filteredDoctors[index];
+                  return _buildDoctorCard(doctor);
+                },
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActiveFiltersBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.deepPurple.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Obx(() {
+            final filters = [];
+            if (controller.searchQuery.isNotEmpty) filters.add("بحث: ${controller.searchQuery.value}");
+            if (controller.minRating.value > 0) filters.add("تقييم ≥ ${controller.minRating.value.toStringAsFixed(1)}");
+            if (controller.maxPrice.value < 100) filters.add("سعر ≤ ${(controller.maxPrice.value ).toInt()} ${controller.currency}");
+
+            return Expanded(
               child: Text(
-                "Morning Slots",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontSize: 16),
+                filters.join(" | "),
+                style: const TextStyle(color: Colors.deepPurple),
               ),
+            );
+          }),
+          IconButton(
+            icon: const Icon(Icons.close, size: 18),
+            onPressed: controller.clearFilters,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDoctorCard(Doctor doctor) {
+    return GestureDetector(
+      onTap: () {
+        Get.toNamed('/appointment', arguments: doctor);
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-            SizedBox(height: 10),
-            Wrap(
-              spacing: 16,
-              runSpacing: 10,
-              children: [
-                _slotButton("10:00 AM", royalPurple),
-                _slotButton("10:30 AM", royalPurple),
-                _slotButton("11:00 AM", royalPurple),
-                _slotButton("11:30 AM", royalPurple),
-              ],
+          ],
+        ),
+        child: Row(
+          children: [
+            // صورة الطبيب
+            CircleAvatar(
+              radius: 32,
+              backgroundColor: Colors.grey.shade200,
+              backgroundImage: doctor.profileImage != null && doctor.profileImage!.isNotEmpty
+                  ? NetworkImage(doctor.fullImageUrl)
+                  : const AssetImage("assets/images/default_doctor.png") as ImageProvider,
             ),
-            SizedBox(height: 22),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Afternoon Slots",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                    fontSize: 16),
-              ),
-            ),
-            SizedBox(height: 10),
-            Wrap(
-              spacing: 16,
-              runSpacing: 10,
-              children: [
-                _slotButton("2:00 PM", royalPurple),
-                _slotButton("3:30 PM", royalPurple),
-                _slotButton("4:00 PM", royalPurple),
-              ],
-            ),
-            SizedBox(height: 35),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Colors.white,
-                    Colors.white.withOpacity(0.8),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(14),
-                boxShadow: [
-                  BoxShadow(
-                    color: royalPurple.withOpacity(0.3),
-                    blurRadius: 7,
-                    spreadRadius: 1,
-                    offset: Offset(0, 3),
+            const SizedBox(width: 16),
+
+            // معلومات الطبيب
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    doctor.name,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    doctor.specialization ?? 'غير محدد',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        "${doctor.rating} (${doctor.reviewCount} تقييم)",
+                        style: const TextStyle(fontSize: 13),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "${doctor.pricePerHour} ${controller.currency}",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green),
+                      ),
+                    ],
                   ),
                 ],
               ),
-              child: Row(
-                children: [
-                  Icon(Icons.message, color: Colors.blue),
-                  SizedBox(width: 14),
-                  Expanded(
-                      child: Text(
-                    "Messaging\nCan communicate with the doctor.",
-                    style: TextStyle(color: Colors.black, fontSize: 14),
-                  )),
-                  Text("\$05",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 17,
-                          color: Colors.green)),
-                ],
-              ),
             ),
-            SizedBox(height: 35),
-            ElevatedButton(
-              onPressed: selectedSlot == null || isBooking
-                  ? null
-                  : () async {
-                      setState(() {
-                        isBooking = true;
-                      });
-
-                      await Future.delayed(Duration(seconds: 2));
-
-                      setState(() {
-                        isBooking = false;
-                      });
-
-                      showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (context) => AlertDialog(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          content: Row(
-                            children: [
-                              Icon(Icons.check_circle_outline,
-                                  color: royalPurple),
-                              SizedBox(width: 12),
-                              Expanded(
-                                child: RichText(
-                                  text: TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text:
-                                            "Appointment booked successfully ",
-                                        style: TextStyle(
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      TextSpan(
-                                        text: "at $selectedSlot",
-                                        style: TextStyle(
-                                            color: Colors.green.shade700,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-
-                      Future.delayed(Duration(seconds: 2), () {
-                        Navigator.of(context).pop();
-                      });
-                    },
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    selectedSlot == null ? Colors.grey : royalPurple,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 14, horizontal: 40),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                elevation: 4,
-                shadowColor: royalPurple.withOpacity(0.7),
-              ),
-              child: isBooking
-                  ? SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 3,
-                      ),
-                    )
-                  : Text(
-                      "Book Appointment",
-                      style: TextStyle(fontSize: 18, color: Colors.white),
-                    ),
-            ),
-            SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
-
-  Widget _infoCard(String title, String subtitle, Color royalPurple) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      width: 85,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(
-            color: royalPurple.withOpacity(0.15),
-            blurRadius: 10,
-            spreadRadius: 2,
-            offset: Offset(0, 5),
-          )
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(title,
-              style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: royalPurple)),
-          SizedBox(height: 4),
-          Text(subtitle,
-              style: TextStyle(
-                color: Colors.grey.shade700,
-                fontSize: 13,
-              )),
-        ],
-      ),
-    );
-  }
-
-  Widget _slotButton(String time, Color royalPurple) {
-    final bool isSelected = selectedSlot == time;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedSlot = isSelected ? null : time;
-        });
-      },
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 250),
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-        decoration: BoxDecoration(
-          color: isSelected ? royalPurple : Colors.white,
-          border: Border.all(
-              color: isSelected ? royalPurple : Colors.grey.shade400),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: royalPurple.withOpacity(0.3),
-                    blurRadius: 6,
-                    spreadRadius: 1,
-                    offset: Offset(0, 3),
-                  )
-                ]
-              : [],
+  void _showAdvancedFilterDialog(BuildContext context) {
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
-        child: Text(
-          time,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey.shade800,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            fontSize: 15,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // العنوان وزر الإغلاق
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "الفلترة المتقدمة",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepPurple,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: Get.back,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // فلترة التقييم
+              Obx(() => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.star, color: Colors.amber, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "الحد الأدنى للتقييم",
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "${controller.minRating.value.toStringAsFixed(1)} نجوم",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 6,
+                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10),
+                    ),
+                    child: Slider(
+                      min: 0,
+                      max: 5,
+                      divisions: 10,
+                      value: controller.minRating.value,
+                      activeColor: Colors.deepPurple,
+                      inactiveColor: Colors.grey.shade300,
+                      onChanged: (value) => controller.minRating.value = value,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text("0", style: TextStyle(fontSize: 12)),
+                      Text("5", style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
+              )),
+
+              const SizedBox(height: 24),
+
+              // فلترة السعر
+              Obx(() => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.attach_money, color: Colors.deepPurple, size: 20),
+                      const SizedBox(width: 8),
+                      const Text(
+                        "الحد الأقصى للسعر",
+                        style: TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                      const Spacer(),
+                      Text(
+                        "${(controller.maxPrice.value).toInt()} ${controller.currency}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SliderTheme(
+                    data: SliderThemeData(
+                      trackHeight: 6,
+                      thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10),
+                    ),
+                    child: Slider(
+                      min: 0,
+                      max: 100,
+
+                      value: controller.maxPrice.value,
+                      activeColor: Colors.green,
+                      inactiveColor: Colors.grey.shade300,
+                      onChanged: (value) => controller.maxPrice.value = value,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: const [
+                      Text("0", style: TextStyle(fontSize: 12)),
+                      Text("100%", style: TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                ],
+              )),
+
+              const SizedBox(height: 24),
+
+              // أزرار التطبيق والمسح
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: controller.clearFilters,
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        side: BorderSide(color: Colors.red.shade300),
+                      ),
+                      child: Text(
+                        "مسح الفلترة",
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        controller.applyFilters();
+                        Get.back();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.deepPurple,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text(
+                        "تطبيق الفلترة",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-// صفحة اللسته 
-class DoctorsListPage extends StatelessWidget {
-  final List<Map<String, dynamic>> doctors = [
-    {
-      "name": "Dr. Amelia Emma",
-      "specialty": "Gynecologist",
-      "image": "assets/images/a.jpg",
-      "date": "10 April 2025",
-      "rating": 4.7,
-    },
-    {
-      "name": "Dr. Daniel Jack",
-      "specialty": "Neurologist",
-      "image": "assets/images/a.jpg",
-      "date": "11 April 2025",
-      "rating": 4.5,
-    },
-    {
-      "name": "Dr. Sarah Connor",
-      "specialty": "Cardiologist",
-      "image": "assets/images/a.jpg",
-      "date": "12 April 2025",
-      "rating": 4.8,
-    },
-    {
-      "name": "Dr. Logan Mason",
-      "specialty": "Dentist",
-      "image": "assets/images/a.jpg",
-      "date": "13 April 2025",
-      "rating": 4.6,
-    },
-  ];
-
-  DoctorsListPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Doctors List"),
-        backgroundColor: Colors.deepPurple,
-      ),
-      body: ListView.builder(
-        itemCount: doctors.length,
-        itemBuilder: (context, index) {
-          final doctor = doctors[index];
-          return ListTile(
-            leading: CircleAvatar(
-              backgroundImage: AssetImage(doctor["image"]),
-            ),
-            title: Text(doctor["name"]),
-            subtitle: Text(doctor["specialty"]),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DoctorDetailsPage(
-                    name: doctor["name"],
-                    specialty: doctor["specialty"],
-                    date: doctor["date"],
-                    rating: doctor["rating"],
-                    image: doctor["image"],
-                  ),
-                ),
-              );
-            },
-          );
-        },
       ),
     );
   }

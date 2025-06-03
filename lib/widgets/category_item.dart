@@ -1,30 +1,54 @@
-// lib/widgets/category_item.dart
 import 'package:flutter/material.dart';
 
 class CategoryItem extends StatelessWidget {
   final String title;
-  final IconData icon;
+  final Widget? iconWidget;
+  final VoidCallback? onTap;
 
-  const CategoryItem({super.key, required this.title, required this.icon});
+  const CategoryItem({
+    super.key,
+    required this.title,
+    this.iconWidget,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(right: 12),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-          color: Colors.white, borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: Colors.deepPurple,
-            child: Icon(icon, size: 16, color: Colors.white),
-          ),
-          const SizedBox(height: 5),
-          Text(title, style: const TextStyle(fontSize: 10)),
-        ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 70,
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: const BoxDecoration(
+                color: Color.fromARGB(255, 247, 246, 248),
+                shape: BoxShape.circle,
+              ),
+              child: iconWidget ??
+                  const Icon(
+                    Icons.help_outline,
+                    size: 30,
+                    color: Color.fromARGB(255, 122, 4, 240),
+                  ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
