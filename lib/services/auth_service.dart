@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class AuthService {
-  final String baseUrl = 'http://10.0.2.2:8000/api'; // 👈 تأكد ده شغال مع emulator
+  final String baseUrl = dotenv.env['API_URL'] ?? 'http://localhost:8000/api'; // 👈 أخذ من .env
 
   /// تسجيل الدخول
   Future<Map<String, dynamic>> login(String email, String password) async {
