@@ -8,6 +8,8 @@ import '../widgets/category_item.dart'; // ← تأكد أنك مستورد هذ
 class HorizontalCategoryList extends StatelessWidget {
   final controller = Get.find<CategoryController>();
 
+   
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -31,7 +33,7 @@ class HorizontalCategoryList extends StatelessWidget {
             return CategoryItem(
               title: cat.name,
               iconWidget: cat.iconUrl != null
-                  ? Image.network(cat.iconUrl!, height: 28, width: 28)
+                  ? Image.network(cat.iconUrl, height: 28, width: 28)
                   : const Icon(Icons.category),
               onTap: () {
                 // Navigate to category details page

@@ -4,6 +4,8 @@ import 'package:ondoctor/Screens/Auth/siginup.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingPage extends StatefulWidget {
+  const OnboardingPage({super.key});
+
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
 }
@@ -144,7 +146,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 class TopHalfCircle extends StatelessWidget {
   final String imagePath;
 
-  const TopHalfCircle({required this.imagePath});
+  const TopHalfCircle({super.key, required this.imagePath});
 
   @override
   Widget build(BuildContext context) {

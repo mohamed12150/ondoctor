@@ -5,7 +5,6 @@ import 'package:ondoctor/controllers/auth_controller.dart';
 
 import 'package:ondoctor/Screens/Auth/Password.dart';
 import 'package:ondoctor/Screens/Auth/siginup.dart';
-import 'package:ondoctor/Screens/home.dart';
 
 
 class LoginPage extends StatefulWidget {

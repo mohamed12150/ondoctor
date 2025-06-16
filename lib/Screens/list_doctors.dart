@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/doctor_model.dart';
 import '../controllers/doctor_list_controller.dart';
-import 'doctor_details_page.dart';
 
 class DoctorsListPage extends StatelessWidget {
   final List<Doctor> doctors;

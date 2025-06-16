@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/category_model.dart';
 class CategoryService {
 
-  static const baseUrl = 'http://10.0.2.2:8000/api';
+  static const baseUrl = 'http://127.0.0.1:8000/api';
 
 
 

@@ -11,6 +11,7 @@ import 'package:ondoctor/Screens/doctor_details_page.dart';
 import 'package:ondoctor/Screens/list_doctors.dart';
 import 'package:ondoctor/Screens/messages/listchat.dart';
 import 'package:ondoctor/Screens/profile_screen.dart';
+import 'package:ondoctor/controllers/theme_controller.dart';
 import 'package:ondoctor/widgets//category_item.dart';
 import 'package:ondoctor/Screens/doctor_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,6 +27,9 @@ class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
+
+final themeController = Get.find<ThemeController>();
+final isEnglish = Get.locale?.languageCode == 'en';
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
@@ -51,10 +55,13 @@ class _HomeState extends State<Home> {
 
       if (token == null || token.isEmpty) {
         // لو ما مسجل دخول
-        Get.snackbar("تنبيه", "يجب تسجيل الدخول أولاً",
-            backgroundColor: Colors.red.shade100,
-            colorText: Colors.black,
-            duration: const Duration(seconds: 2));
+        Get.snackbar(
+          "تنبيه",
+          "يجب تسجيل الدخول أولاً",
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.black,
+          duration: const Duration(seconds: 2),
+        );
 
         Get.toNamed('/login'); // استخدم الراوت المناسب لي صفحة تسجيل الدخول
         return;
@@ -66,7 +73,7 @@ class _HomeState extends State<Home> {
     });
   }
 
-// bottom navgtion bar
+  // bottom navgtion bar
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,9 +113,10 @@ class _HomeState extends State<Home> {
                     behavior: HitTestBehavior.translucent,
                     child: Icon(
                       _icons[index],
-                      color: isSelected
-                          ? Colors.purple.shade700
-                          : Colors.grey.shade400,
+                      color:
+                          isSelected
+                              ? Colors.purple.shade700
+                              : Colors.grey.shade400,
                       size: isSelected ? 30 : 24,
                     ),
                   );
@@ -166,8 +174,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchController.addListener(_onSearchChanged);
     loadUserName();
     // إذا ما عندك Binding تلقائي
-
-
   }
 
   @override
@@ -175,21 +181,24 @@ class _HomeScreenState extends State<HomeScreen> {
     _searchController.dispose();
     super.dispose();
   }
+
   final CategoryController categoryController = Get.put(CategoryController());
   final doctorController = Get.put(DoctorController());
-
 
   void _onSearchChanged() {
     String searchText = _searchController.text.toLowerCase();
 
     setState(() {
-      filteredDoctors = doctors.where((doctor) {
-        final nameLower = doctor["name"].toLowerCase();
-        final specialtyLower = doctor["specialty"].toLowerCase();
-        return nameLower.contains(searchText) || specialtyLower.contains(searchText);
-      }).toList();
+      filteredDoctors =
+          doctors.where((doctor) {
+            final nameLower = doctor["name"].toLowerCase();
+            final specialtyLower = doctor["specialty"].toLowerCase();
+            return nameLower.contains(searchText) ||
+                specialtyLower.contains(searchText);
+          }).toList();
     });
   }
+
   void loadUserName() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -197,223 +206,245 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children:  [
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(isEnglish ? "Home" : "الرئيسية"),
+        centerTitle: true,
 
-                    Text(
-                      userName.isNotEmpty ? "Hello, $userName" : "Hello",
-                      style: const TextStyle(
-                        fontSize: 26,
+        actions: [
+          Obx(
+            () => IconButton(
+              icon: Icon(
+                themeController.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+              ),
+              onPressed: themeController.toggleTheme,
+            ),
+          ),
+
+          const Icon(
+            Icons.notifications_active_outlined,
+            size: 30,
+            color: Colors.black54,
+          ),
+          IconButton(
+            icon: const Icon(Icons.language),
+            onPressed: () {
+              final newLocale =
+                  isEnglish ? const Locale('ar') : const Locale('en');
+              Get.updateLocale(newLocale);
+            },
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    userName.isNotEmpty ? "Hello, $userName" : "Hello",
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // مربع البحث
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 253, 252, 252),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(
+                        255,
+                        128,
+                        104,
+                        170,
+                      ).withOpacity(0.1),
+                      blurRadius: 1,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                  border: Border.all(color: Colors.black),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TextField(
+                  controller: _searchController,
+                  decoration: const InputDecoration(
+                    icon: Icon(
+                      Icons.search,
+                      color: Color.fromARGB(255, 90, 34, 187),
+                    ),
+                    hintText: "Search",
+                    hintStyle: TextStyle(color: Colors.grey),
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Departments",
+                    style: TextStyle(
+                      color: Colors.black87,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => DoctorsListPage(doctors: []),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      "See All",
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: Colors.purple,
                       ),
                     ),
-                    const SizedBox(height: 5),
-                  ],
-                ),
-                const Icon(Icons.notifications_active_outlined,
-                    size: 30, color: Colors.black54),
-              ],
-            ),
-            const SizedBox(height: 20),
-
-            // مربع البحث
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 253, 252, 252),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color.fromARGB(255, 128, 104, 170).withOpacity(0.1),
-                    blurRadius: 1,
-                    offset: const Offset(0, 5),
                   ),
                 ],
-                border: Border.all(color: Colors.black),
-                borderRadius: BorderRadius.circular(12),
               ),
-              child: TextField(
-                controller: _searchController,
-                decoration: const InputDecoration(
-                  icon: Icon(
-                    Icons.search,
-                    color: Color.fromARGB(255, 90, 34, 187),
-                  ),
-                  hintText: "Search",
-                  hintStyle: TextStyle(color: Colors.grey),
-                  border: InputBorder.none,
-                ),
-              ),
-            ),
+              const SizedBox(height: 12),
+              Obx(() {
+                if (categoryController.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Departments",
-                  style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>  DoctorsListPage(doctors: [],)),
-                    );
+                if (categoryController.categories.isEmpty) {
+                  return const Center(child: Text("لا توجد تصنيفات متاحة"));
+                }
 
-                  },
-                  child: Text(
-                    "See All",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.purple),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Obx(() {
-              if (categoryController.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
+                return SizedBox(
+                  height: 100,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categoryController.categories.length,
+                    itemBuilder: (context, index) {
+                      final category = categoryController.categories[index];
 
-              if (categoryController.categories.isEmpty) {
-                return const Center(child: Text("لا توجد تصنيفات متاحة"));
-              }
-
-              return SizedBox(
-                height: 100,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categoryController.categories.length,
-                  itemBuilder: (context, index) {
-                    final category = categoryController.categories[index];
-
-                    return CategoryItem(
-                      title: category.name,
-                      iconWidget:Image.network(
-                        category.iconUrl,
-                        height: 30,
-                        width: 30,
-                        fit: BoxFit.contain,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const SizedBox(
-                            height: 30,
-                            width: 30,
-                            child: Center(
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
+                      return CategoryItem(
+                        title: category.name,
+                        iconWidget: Image.network(
+                          category.iconUrl,
+                          height: 30,
+                          width: 30,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder:
+                              (_, __, ___) => const Icon(Icons.category),
+                        ),
+                        onTap: () {
+                          print(
+                            'Category Tapped: id=${category.id}, name=${category.name}, iconUrl=${category.iconUrl}',
                           );
+
+                          // Get.toNamed('/categories', arguments: {
+                          //   'id': category.id,
+                          //   'name': category.name,
+                          // });
                         },
-                        errorBuilder: (_, __, ___) => const Icon(Icons.category),
-                      ),
-                      onTap: () {
-                        print('Category Tapped: id=${category.id}, name=${category.name}, iconUrl=${category.iconUrl}');
+                      );
+                    },
+                  ),
+                );
+              }),
 
-                        // Get.toNamed('/categories', arguments: {
-                        //   'id': category.id,
-                        //   'name': category.name,
-                        // });
-                      },
-
-                    );
-                  },
-                ),
-              );
-            }),
-
-            const SizedBox(height: 30),
-            const Text(
-              "Upcoming Schedule",
-              style: TextStyle(
+              const SizedBox(height: 30),
+              const Text(
+                "Upcoming Schedule",
+                style: TextStyle(
                   color: Colors.black87,
                   fontSize: 20,
-                  fontWeight: FontWeight.w900),
-            ),
-            const SizedBox(height: 10),
-            buildStackedVerticalCards(), // ✅ هذا هو الويدجت الصحيح
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 10),
+              buildStackedVerticalCards(), // ✅ هذا هو الويدجت الصحيح
 
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Popular Doctors",
-                  style: TextStyle(
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Popular Doctors",
+                    style: TextStyle(
                       color: Colors.black87,
                       fontSize: 20,
-                      fontWeight: FontWeight.w900),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Get.to(() => DoctorsListPage(
-                      doctors: doctorController.filteredDoctors,
-                    ));
-                  },
-                  child: Text(
-                    "See All",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.purple,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
-
-
-              ],
-            ),
-            const SizedBox(height: 10),
-
-            // عرض الأطباء حسب الفلترة
-
-
-            Obx(() {
-              return Column(
-                children: doctorController.filteredDoctors.map((doctor) {
-                  return GestureDetector(
+                  GestureDetector(
                     onTap: () {
-                      Get.toNamed('/appointment', arguments: doctor);
+                      Get.to(
+                        () => DoctorsListPage(
+                          doctors: doctorController.filteredDoctors,
+                        ),
+                      );
                     },
-                    child: DoctorCard(doctor: doctor),
-                  );
-                }).toList(),
-              );
-            })
+                    child: Text(
+                      "See All",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.purple,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
 
-
-
-
-
-
-
-
-
-          ]),
+              // عرض الأطباء حسب الفلترة
+              Obx(() {
+                return Column(
+                  children:
+                      doctorController.filteredDoctors.map((doctor) {
+                        return GestureDetector(
+                          onTap: () {
+                            Get.toNamed('/appointment', arguments: doctor);
+                          },
+                          child: DoctorCard(doctor: doctor),
+                        );
+                      }).toList(),
+                );
+              }),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
-
-
-
-
 
 Widget buildStackedVerticalCards() {
   final List<Map<String, dynamic>> scheduleList = [
@@ -421,19 +452,19 @@ Widget buildStackedVerticalCards() {
       "name": "Prof. Dr. Logan Mason",
       "specialty": "Dentist",
       "date": "June 12, 9:30 AM",
-      "image": "assets/images/a.jpg"
+      "image": "assets/images/a.jpg",
     },
     {
       "name": "Dr. Sarah Connor",
       "specialty": "Cardiologist",
       "date": "June 15, 11:00 AM",
-      "image": "assets/images/a.jpg"
+      "image": "assets/images/a.jpg",
     },
     {
       "name": "Dr. Ahmed",
       "specialty": "Neurologist",
       "date": "June 18, 2:00 PM",
-      "image": "assets/images/a.jpg"
+      "image": "assets/images/a.jpg",
     },
   ];
 
@@ -441,13 +472,16 @@ Widget buildStackedVerticalCards() {
     height: 220, // زيادة الارتفاع لعرض جزء من البطاقة التالية
     child: Swiper(
       itemCount: scheduleList.length,
-      itemWidth: MediaQueryData.fromWindow(WidgetsBinding.instance.window).size.width * 0.9,
+      itemWidth:
+          MediaQueryData.fromView(WidgetsBinding.instance.window).size.width *
+          0.9,
       itemHeight: 180,
       layout: SwiperLayout.STACK,
       scrollDirection: Axis.vertical,
       loop: true,
       duration: 600,
-      viewportFraction: 0.65, // لتقليل المساحة المحتلة لكل كرت وإظهار جزء من الكرت الذي يليه
+      viewportFraction:
+          0.65, // لتقليل المساحة المحتلة لكل كرت وإظهار جزء من الكرت الذي يليه
       scale: 0.85, // تقليل حجم الكروت الخلفية لإعطاء إحساس بالعمق
       itemBuilder: (context, index) {
         return buildScheduleCard(scheduleList[index]);
@@ -493,24 +527,28 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(schedule["name"],
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16)),
-                  Text(schedule["specialty"],
-                      style: const TextStyle(
-                          color: Colors.white70, fontSize: 13)),
+                  Text(
+                    schedule["name"],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  Text(
+                    schedule["specialty"],
+                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                  ),
                 ],
               ),
             ),
             const Icon(LucideIcons.messageCircle, color: Colors.white70),
-
           ],
         ),
         const SizedBox(height: 20),
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,           // مثل justify-content: center;
+          mainAxisAlignment:
+              MainAxisAlignment.spaceBetween, // مثل justify-content: center;
 
           children: [
             buildDatePill(Icons.calendar_today, date),
@@ -518,9 +556,8 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
             if (time.isNotEmpty) ...[
               const SizedBox(width: 1),
               buildDatePill(Icons.access_time, time),
-            ]
+            ],
           ],
-
         ),
       ],
     ),
@@ -538,8 +575,7 @@ Widget buildDatePill(IconData icon, String text) {
       children: [
         Icon(icon, color: Colors.white, size: 16),
         const SizedBox(width: 6),
-        Text(text,
-            style: const TextStyle(color: Colors.white, fontSize: 13)),
+        Text(text, style: const TextStyle(color: Colors.white, fontSize: 13)),
       ],
     ),
   );
