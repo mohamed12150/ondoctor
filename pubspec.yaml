@@ -41,12 +41,16 @@ dependencies:
   image_picker: ^1.1.2
   google_fonts: ^6.2.1
   shared_preferences: ^2.5.3
+
+
   get: ^4.6.6
   http: ^1.0.0
   flutter_card_swiper: ^3.0.0
   card_swiper: ^2.0.4
   flutter_vector_icons: ^2.0.0
   lucide_icons: ^0.257.0
+  flutter_dotenv: ^5.1.0
+
 
 
 
@@ -88,11 +92,12 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  fonts:
+    - family: Soudia
+      fonts:
+        - asset: assets/fonts/Soudia/1.otf
+        
+          weight: 700
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

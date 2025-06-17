@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class ScheduleCard extends StatelessWidget {
   final String name;
   final String specialty;
@@ -23,23 +22,24 @@ class ScheduleCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.purple,
+        color: const Color.fromARGB(255, 69, 67, 70),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 30,
-            backgroundImage: AssetImage(image),
-          ),
+          CircleAvatar(radius: 30, backgroundImage: AssetImage(image)),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(name,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.white)),
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
                 Text(specialty, style: const TextStyle(color: Colors.white70)),
                 const SizedBox(height: 5),
                 Text(date, style: const TextStyle(color: Colors.white)),
@@ -48,8 +48,10 @@ class ScheduleCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.star, color: Colors.amber, size: 16),
                     const SizedBox(width: 4),
-                    Text("$rating",
-                        style: const TextStyle(color: Colors.white)),
+                    Text(
+                      "$rating",
+                      style: const TextStyle(color: Colors.white),
+                    ),
                   ],
                 ),
               ],

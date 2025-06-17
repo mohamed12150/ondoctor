@@ -8,6 +8,8 @@ import '../widgets/category_item.dart'; // ← تأكد أنك مستورد هذ
 class HorizontalCategoryList extends StatelessWidget {
   final controller = Get.find<CategoryController>();
 
+   HorizontalCategoryList({super.key});
+
    
 
   @override

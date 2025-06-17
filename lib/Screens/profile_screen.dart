@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ondoctor/Screens/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
-
-
-
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -18,7 +16,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String? userName;
   String? email;
-  @override
   @override
   void initState() {
     super.initState();
@@ -34,6 +31,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       email = prefs.getString('email') ?? '';
     });
   }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -50,75 +48,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _openChronicDiseasesScreen() {
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const ChronicDiseasesScreen(),
-      ),
+      MaterialPageRoute(builder: (context) => const ChronicDiseasesScreen()),
     );
   }
 
   void _showLogoutConfirmation() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('تأكيد تسجيل الخروج'),
-        content: const Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(), // إلغاء
-            child: const Text('لا'),
+      builder:
+          (context) => AlertDialog(
+            title: const Text('تأكيد تسجيل الخروج'),
+            content: const Text('هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('لا'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  Navigator.of(context).pop();
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.remove('token');
+                  await prefs.remove('userName');
+                  await prefs.remove('email');
+                  Get.snackbar(
+                    'تم تسجيل الخروج',
+                    'يرجى تسجيل الدخول مرة أخرى',
+                    colorText: Colors.black,
+                  );
+                  Get.offAllNamed('/login');
+                },
+                child: const Text('نعم'),
+              ),
+            ],
           ),
-          TextButton(
-            onPressed: () async  {
-              Navigator.of(context).pop();
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.remove('token');      // حذف التوكن
-              await prefs.remove('userName');
-              await prefs.remove('email'); //
-              Get.snackbar(
-              'تم تسجيل الخروج',
-              'يرجى تسجيل الدخول مرة أخرى',
-              colorText: Colors.black,
-              );
-
-              Get.offAllNamed('/login'); // توجيه لصفحة تسجيل الدخول
-              },
-
-            child: const Text('نعم'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLanguageSelection() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('اختر اللغة'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: const Text('العربية'),
-              onTap: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('تم اختيار اللغة العربية')),
-                );
-              },
-            ),
-            ListTile(
-              title: const Text('English'),
-              onTap: () {
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('English language selected')),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -126,59 +89,104 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        backgroundColor: const Color(0xFFF9F9FB),
+        backgroundColor:
+            themeController.isDarkMode ? Colors.black : Colors.grey[50],
+
+        appBar: AppBar(
+          title: Text(
+            'الملف الشخصي'.tr,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          centerTitle: true,
+          elevation: 0,
+          backgroundColor:
+              themeController.isDarkMode ? Colors.grey[900] : Colors.white,
+
+          foregroundColor: Colors.deepPurple,
+        ),
         body: RefreshIndicator(
-          onRefresh: () async => setState(() {}),
+          onRefresh: () async => loadUserData(),
           child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(
+              parent: BouncingScrollPhysics(),
+            ),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Profile Card
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple,
+                      color:
+                          themeController.isDarkMode
+                              ? Colors.grey[800]
+                              : Colors.white,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 10,
                           spreadRadius: 2,
-                          blurRadius: 6,
+                          offset: const Offset(0, 5),
                         ),
                       ],
                     ),
                     child: Row(
                       children: [
-                        Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: _changeAvatar,
-                              child: CircleAvatar(
-                                radius: 40,
-                                backgroundColor: Colors.grey.shade200,
-                                backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
-                                child: _profileImage == null
-                                    ? const Icon(Icons.person, size: 45, color: Colors.grey)
-                                    : null,
+                        // Profile Image
+                        GestureDetector(
+                          onTap: _changeAvatar,
+                          child: Stack(
+                            alignment: Alignment.bottomRight,
+                            children: [
+                              Container(
+                                width: 90,
+                                height: 90,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      themeController.isDarkMode
+                                          ? Colors.grey
+                                          : Colors.grey,
+                                  image:
+                                      _profileImage != null
+                                          ? DecorationImage(
+                                            image: FileImage(_profileImage!),
+                                            fit: BoxFit.cover,
+                                          )
+                                          : null,
+                                ),
+                                child:
+                                    _profileImage == null
+                                        ? Icon(
+                                          Icons.person,
+                                          size: 40,
+                                          color:
+                                              themeController.isDarkMode
+                                                  ? Colors.deepPurple
+                                                  : Colors.white,
+                                        )
+                                        : null,
                               ),
-                            ),
-                            Positioned.fill(
-                              child: Material(
-                                color: Colors.black26,
-                                shape: const CircleBorder(),
-                                child: InkWell(
-                                  customBorder: const CircleBorder(),
-                                  onTap: _changeAvatar,
-                                  child: const Center(
-                                    child: Icon(Icons.edit, color: Colors.white, size: 20),
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.deepPurple,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
                                   ),
                                 ),
+                                child: const Icon(
+                                  Icons.edit,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         const SizedBox(width: 20),
                         Expanded(
@@ -186,60 +194,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                          (userName != null && userName!.isNotEmpty) ? userName! : 'اسم المستخدم',
-
-                          style: const TextStyle(
+                                userName ?? 'اسم المستخدم',
+                                style: TextStyle(
                                   fontSize: 20,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      themeController.isDarkMode
+                                          ? Colors.white
+                                          : Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 6),
+                              const SizedBox(height: 8),
                               Text(
-                                (email ?? '').isNotEmpty ? email! : 'البريد الإلكتروني',
-                                style: const TextStyle(
+                                email ?? 'البريد الإلكتروني',
+                                style: TextStyle(
                                   fontSize: 14,
-                                  color: Colors.grey,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple[50],
+                                  foregroundColor: Colors.deepPurple,
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                ),
+                                child: Text(
+                                  'تعديل الملف الشخصي'.tr,
+                                  style: TextStyle(fontSize: 12),
                                 ),
                               ),
                             ],
                           ),
-                        )
+                        ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 30),
+
+                  // Settings Sections
+                  _buildSettingsSection(
+                    title: "الإعدادات العامة".tr,
+                    children: [
+                      _buildSettingsTile(
+                        icon: Icons.local_hospital_outlined,
+                        title: "الأمراض المزمنة".tr,
+                        subtitle: "إدارة الأمراض المزمنة".tr,
+                        onTap: _openChronicDiseasesScreen,
+                      ),
+                      _buildSettingsTile(
+                        icon: Icons.workspace_premium_outlined,
+                        title: "الاشتراك".tr,
+                        subtitle: "بريميوم - ينتهي في 2025-12-31".tr,
+                      ),
+                    ],
+                  ),
 
                   const SizedBox(height: 20),
 
-                  const Text(
-                    "General",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
+                  _buildSettingsSection(
+                    title: "إعدادات الحساب".tr,
+                    children: [
+                      _buildSettingsTile(
+                        icon: Icons.lock_outline,
+                        title: "تغيير كلمة المرور".tr,
+                      ),
+                      _buildSettingsTile(
+                        icon: Icons.support_agent,
+                        title: "الدعم الفني".tr,
+                      ),
+                      _buildSettingsTile(
+                        icon: Icons.logout,
+                        title: "تسجيل الخروج".tr,
+                        subtitle: "تسجيل الخروج".tr,
+                        iconColor: Colors.red,
+                        textColor: Colors.red,
+                        onTap: _showLogoutConfirmation,
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 10),
-
-                  _buildSettingsTile(Icons.local_hospital_outlined, "Chronic Diseases", subtitle: "None", onTap: _openChronicDiseasesScreen),
-                  _buildSettingsTile(Icons.workspace_premium_outlined, "Subscription", subtitle: "Premium - expires on 2025-12-31"),
-
-                  const SizedBox(height: 20),
-
-                  const Text(
-                    "Account",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  _buildSettingsTile(Icons.language, "Language", onTap: _showLanguageSelection),
-                  _buildSettingsTile(Icons.lock_outline, "Change Password"),
-                  _buildSettingsTile(Icons.support_agent, "Support"),
-                  _buildSettingsTile(Icons.logout, "Log Out", iconColor: Colors.red, textColor: Colors.red, onTap: _showLogoutConfirmation),
                 ],
               ),
             ),
@@ -249,23 +290,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildSettingsTile(IconData icon, String title, {String? subtitle, Color? iconColor, Color? textColor, void Function()? onTap}) {
+  Widget _buildSettingsSection({
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 8),
+          child: Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: themeController.isDarkMode ? Colors.white : Colors.black,
+            ),
+          ),
+        ),
+        Container(
+          decoration: BoxDecoration(
+            color: themeController.isDarkMode ? Colors.grey[800] : Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.05),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Column(children: children),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsTile({
+    required IconData icon,
+    required String title,
+    String? subtitle,
+    Color? iconColor,
+    Color? textColor,
+    void Function()? onTap,
+  }) {
     return InkWell(
       onTap: onTap,
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        elevation: 0.5,
-        child: ListTile(
-          leading: Icon(icon, color: iconColor ?? Colors.black87),
-          title: Text(title, style: TextStyle(color: textColor ?? Colors.black, fontWeight: FontWeight.w500)),
-          subtitle: subtitle != null ? Text(subtitle) : null,
-          trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Colors.grey),
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color:
+                    themeController.isDarkMode
+                        ? Colors.grey
+                        : Colors.deepPurple.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color:
+                    themeController.isDarkMode
+                        ? Colors.black
+                        : Colors.deepPurple,
+                size: 20,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          themeController.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                    ),
+                  ),
+                  if (subtitle != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Colors.grey[400],
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
 class ChronicDiseasesScreen extends StatefulWidget {
   const ChronicDiseasesScreen({super.key});
 
@@ -297,116 +430,109 @@ class _ChronicDiseasesScreenState extends State<ChronicDiseasesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chronic Diseases"),
-        backgroundColor: Colors.deepPurple,
+        title: const Text("الأمراض المزمنة"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         elevation: 0,
         centerTitle: true,
       ),
-      backgroundColor: const Color(0xFFF4F3FF),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "Add a New Disease",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
+            // Add Disease Field
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.deepPurple.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: TextField(
-                      controller: _diseaseController,
-                      decoration: InputDecoration(
-                        hintText: "Type disease name...",
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
-                        ),
+                  child: TextField(
+                    controller: _diseaseController,
+                    decoration: InputDecoration(
+                      hintText: "أدخل اسم المرض...",
+                      filled: true,
+                      fillColor: Colors.grey[100],
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 10),
                 ElevatedButton(
+                  onPressed: _addDisease,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepPurple,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                    elevation: 6,
+                    padding: const EdgeInsets.all(14),
                   ),
-                  onPressed: _addDisease,
-                  child: const Icon(Icons.add, size: 28, color: Colors.white),
+                  child: const Icon(Icons.add, color: Colors.white),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
-            Text(
-              "Your Diseases",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
+
+            // Diseases List
             Expanded(
-              child: _diseases.isEmpty
-                  ? Center(
-                      child: Text(
-                        "No chronic diseases added yet.",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.deepPurple.shade200,
-                          fontWeight: FontWeight.w500,
+              child:
+                  _diseases.isEmpty
+                      ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.medical_services_outlined,
+                              size: 50,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              "لا توجد أمراض مسجلة",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
                         ),
+                      )
+                      : ListView.builder(
+                        itemCount: _diseases.length,
+                        itemBuilder:
+                            (context, index) => Card(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: Colors.deepPurple.withOpacity(0.1),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.medical_services_outlined,
+                                    color: Colors.deepPurple,
+                                  ),
+                                ),
+                                title: Text(_diseases[index]),
+                                trailing: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete_outline,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () => _removeDisease(index),
+                                ),
+                              ),
+                            ),
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: _diseases.length,
-                      itemBuilder: (context, index) => Card(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        elevation: 3,
-                        child: ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.deepPurple.shade100,
-                            child: const Icon(Icons.local_hospital_outlined, color: Colors.deepPurple),
-                          ),
-                          title: Text(
-                            _diseases[index],
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                            onPressed: () => _removeDisease(index),
-                            tooltip: "Remove disease",
-                          ),
-                        ),
-                      ),
-                    ),
             ),
           ],
         ),

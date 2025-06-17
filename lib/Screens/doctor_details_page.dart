@@ -17,10 +17,14 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
 
   String? selectedDay;
   String? selectedTime;
-  int selectedTab = 0; // 0 = Schedule, 1 = About Doctor
+  int selectedTab = 0;
 
-  final List<String> days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Next Mon', 'Next Tue'];
-  final List<String> times = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
+  final List<String> days = [
+    'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Next Mon', 'Next Tue'
+  ];
+  final List<String> times = [
+    '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -42,63 +46,34 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
       ),
       body: Stack(
         children: [
-          Column(
-            children: [
-              Container(
-                height: MediaQuery.of(context).size.height * 0.45,
-                width: double.infinity,
-                color: const Color(0xFFDCF1FF),
-                child: Stack(
-                  children: [
-                    Center(
-                      child: Container(
-                        margin: const EdgeInsets.only(top: 40),
-                        width: double.infinity,
-                        height: double.infinity,
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: doctor.profileImage != null && doctor.profileImage!.isNotEmpty
-                                ? NetworkImage(doctor.fullImageUrl)
-                                : const AssetImage("assets/images/default_doctor.png") as ImageProvider,
-                            fit: BoxFit.fill,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: 100,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.white.withOpacity(0.9),
-                              Colors.white.withOpacity(0.0)
-                            ],
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+          // الخلفية بالصورة
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: Container(
+              color: const Color(0xB37744C6),
+              child: Container(
+                margin: const EdgeInsets.only(top: 40),
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: doctor.profileImage != null && doctor.profileImage!.isNotEmpty
+                        ? NetworkImage(doctor.fullImageUrl)
+                        : const AssetImage("assets/images/default_doctor.png") as ImageProvider,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
+
+          // المحتوى الأبيض السفلي
           Positioned(
             top: MediaQuery.of(context).size.height * 0.42,
             left: 0,
             right: 0,
+            bottom: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               decoration: const BoxDecoration(
@@ -112,40 +87,42 @@ class _DoctorDetailsPageState extends State<DoctorDetailsPage> {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Column(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Column(
+                        children: [
+                          Text("Dr. ${doctor.name}",
+                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 6),
+                          Text(
+                            doctor.categories.map((c) => c.name).join(", "),
+                            style: const TextStyle(color: Colors.grey, fontSize: 14.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Dr. ${doctor.name}",
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        Text(
-                          doctor.categories.map((c) => c.name).join(", "),
-                          style: const TextStyle(color: Colors.grey,fontSize: 14.5),
+                        GestureDetector(
+                          onTap: () => setState(() => selectedTab = 0),
+                          child: _tabButton("Schedule", selected: selectedTab == 0),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => setState(() => selectedTab = 1),
+                          child: _tabButton("About Doctor", selected: selectedTab == 1),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => setState(() => selectedTab = 0),
-                        child: _tabButton("Schedule", selected: selectedTab == 0),
-                      ),
-                      const SizedBox(width: 12),
-                      GestureDetector(
-                        onTap: () => setState(() => selectedTab = 1),
-                        child: _tabButton("About Doctor", selected: selectedTab == 1),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  selectedTab == 0 ? _buildScheduleSection() : _buildAboutSection(),
-                ],
+                    const SizedBox(height: 24),
+                    selectedTab == 0 ? _buildScheduleSection() : _buildAboutSection(),
+                  ],
+                ),
               ),
             ),
           )

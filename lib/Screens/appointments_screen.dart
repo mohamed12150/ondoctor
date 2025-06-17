@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ondoctor/Screens/home.dart';
 
 class AppointmentPage extends StatefulWidget {
   const AppointmentPage({super.key});
@@ -16,14 +17,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
       'name': 'Cardiology',
       'iconPath': 'assets/images/icons8-cardiology-48.svg',
     },
-    {
-      'name': 'Dentistry',
-      'iconPath': 'assets/images/icons8-neurology-32.svg',
-    },
-    {
-      'name': 'Neurology',
-      'iconPath': 'assets/images/dentist-svgrepo-com.svg',
-    },
+    {'name': 'Dentistry', 'iconPath': 'assets/images/icons8-neurology-32.svg'},
+    {'name': 'Neurology', 'iconPath': 'assets/images/dentist-svgrepo-com.svg'},
     {
       'name': 'Dermatology',
       'iconPath': 'assets/images/icons8-ultrasound-machine-100.svg',
@@ -86,7 +81,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Appointments'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor:
+        // استخدام الكنترولر الخاص بالثيم
+            themeController.isDarkMode ? Colors.grey[900] : Colors.white,
         centerTitle: true,
       ),
       body: Padding(
@@ -103,9 +100,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: showNewAppointment
-                          ? Colors.deepPurple
-                          : Colors.grey[200],
+                      backgroundColor:
+                          showNewAppointment ? Colors.deepPurple : Colors.grey,
                       foregroundColor:
                           showNewAppointment ? Colors.white : Colors.black,
                       shape: RoundedRectangleBorder(
@@ -125,9 +121,10 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: !showNewAppointment
-                          ? Colors.deepPurple
-                          : Colors.grey[200],
+                      backgroundColor:
+                          !showNewAppointment
+                              ? Colors.deepPurple
+                              : Colors.grey[200],
                       foregroundColor:
                           !showNewAppointment ? Colors.white : Colors.black,
                       shape: RoundedRectangleBorder(
@@ -142,91 +139,112 @@ class _AppointmentPageState extends State<AppointmentPage> {
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: showNewAppointment
-                  ? ListView.builder(
-                      itemCount: specialties.length,
-                      itemBuilder: (context, index) {
-                        final spec = specialties[index];
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Colors.black, width: 1.5),
-                          ),
-                          color: Colors.white,
-                          elevation: 0,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            leading: SvgPicture.asset(
-                              spec['iconPath'],
-                              width: 28,
-                              height: 28,
-                            ),
-                            title: Text(
-                              spec['name'],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
+              child:
+                  showNewAppointment
+                      ? ListView.builder(
+                        itemCount: specialties.length,
+                        itemBuilder: (context, index) {
+                          final spec = specialties[index];
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 1.5,
                               ),
                             ),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                            onTap: () {
-                              // الانتقال إلى صفحة اختيار الدكتور
-                            },
-                          ),
-                        );
-                      },
-                    )
-                  : ListView.builder(
-                      itemCount: previousAppointments.length,
-                      itemBuilder: (context, index) {
-                        final appointment = previousAppointments[index];
-                        final status = appointment['Status'] ?? 'Unknown';
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: const BorderSide(color: Colors.black, width: 1.5),
-                          ),
-                          color: Colors.white,
-                          elevation: 0,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 20, vertical: 10),
-                            leading: Icon(
-                              getStatusIcon(status),
-                              color: getStatusColor(status),
-                              size: 32,
-                            ),
-                            title: Text(
-                              appointment['doctor']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
+                            color:
+                                themeController.isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
+
+                            elevation: 0,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
                               ),
-                            ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${appointment['specialty']} - ${appointment['date']}',
-                                  style: const TextStyle(fontSize: 14),
+                              leading: SvgPicture.asset(
+                                spec['iconPath'],
+                                width: 28,
+                                height: 28,
+                              ),
+                              title: Text(
+                                spec['name'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'الحالة: $status',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: getStatusColor(status),
+                              ),
+                              trailing: const Icon(
+                                Icons.arrow_forward_ios,
+                                size: 18,
+                              ),
+                              onTap: () {
+                                // الانتقال إلى صفحة اختيار الدكتور
+                              },
+                            ),
+                          );
+                        },
+                      )
+                      : ListView.builder(
+                        itemCount: previousAppointments.length,
+                        itemBuilder: (context, index) {
+                          final appointment = previousAppointments[index];
+                          final status = appointment['Status'] ?? 'Unknown';
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: const BorderSide(
+                                color: Colors.black,
+                                width: 1.5,
+                              ),
+                            ),
+                            color:
+                                themeController.isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
+                            elevation: 0,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              leading: Icon(
+                                getStatusIcon(status),
+                                color: getStatusColor(status),
+                                size: 32,
+                              ),
+                              title: Text(
+                                appointment['doctor']!,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${appointment['specialty']} - ${appointment['date']}',
+                                    style: const TextStyle(fontSize: 14),
                                   ),
-                                ),
-                              ],
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'الحالة: $status',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: getStatusColor(status),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                    ),
+                          );
+                        },
+                      ),
             ),
           ],
         ),

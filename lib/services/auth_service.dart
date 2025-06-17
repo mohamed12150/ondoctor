@@ -3,7 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final String baseUrl = 'http://127.0.0.1:8000/api'; // 👈 تأكد ده شغال مع emulator
+
+  final String baseUrl = 'http://192.168.8.80:8000/api'; // 👈 تأكد ده شغال مع emulator
+
 
   /// تسجيل الدخول
   Future<Map<String, dynamic>> login(String email, String password) async {

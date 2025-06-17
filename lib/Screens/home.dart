@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart'; // أضف هذه المكتبة
+// أضف هذه المكتبة
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ondoctor/Screens/appointments_screen.dart';
-import 'package:ondoctor/Screens/doctor_details_page.dart' as details;
-import 'package:ondoctor/Screens/doctor_details_page.dart';
 import 'package:ondoctor/Screens/list_doctors.dart';
 import 'package:ondoctor/Screens/messages/listchat.dart';
 import 'package:ondoctor/Screens/profile_screen.dart';
@@ -15,10 +10,8 @@ import 'package:ondoctor/controllers/theme_controller.dart';
 import 'package:ondoctor/widgets//category_item.dart';
 import 'package:ondoctor/Screens/doctor_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:card_swiper/card_swiper.dart';
 import '../controllers/doctor_controller.dart';
-import '../models/category_model.dart';
 import '../controllers/category_controller.dart';
 
 class Home extends StatefulWidget {
@@ -93,7 +86,10 @@ class _HomeState extends State<Home> {
             bottom: 16,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color:
+                    themeController.isDarkMode
+                        ? Colors.grey[900]
+                        : Colors.white,
                 borderRadius: BorderRadius.circular(90),
                 boxShadow: [
                   BoxShadow(
@@ -166,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // للتحكم في TextField
   final TextEditingController _searchController = TextEditingController();
+  final ThemeController themeController = Get.find<ThemeController>();
 
   @override
   void initState() {
@@ -210,32 +207,70 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEnglish ? "Home" : "الرئيسية"),
+        backgroundColor:
+            themeController.isDarkMode ? Colors.grey[900] : Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.notifications_none,
+            color: themeController.isDarkMode ? Colors.white : Colors.black87,
+          ),
+          onPressed: () {
+            // TODO: افتح صفحة الإشعارات
+          },
+        ),
+        title: Text(
+          "Home".tr,
+          style: TextStyle(
+            color: themeController.isDarkMode ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+            fontFamily: "Cairo",
+          ),
+        ),
         centerTitle: true,
-
         actions: [
           Obx(
             () => IconButton(
               icon: Icon(
                 themeController.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                color:
+                    themeController.isDarkMode ? Colors.white : Colors.black87,
               ),
               onPressed: themeController.toggleTheme,
+              tooltip: isEnglish ? "Toggle Theme" : "تغيير الوضع",
             ),
           ),
-
-          const Icon(
-            Icons.notifications_active_outlined,
-            size: 30,
-            color: Colors.black54,
-          ),
-          IconButton(
-            icon: const Icon(Icons.language),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor:
+                  themeController.isDarkMode ? Colors.deepPurple : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+                side: const BorderSide(color: Colors.black, width: 1),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              minimumSize: const Size(40, 30),
+              elevation: 1,
+            ),
             onPressed: () {
               final newLocale =
-                  isEnglish ? const Locale('ar') : const Locale('en');
+                  Get.locale?.languageCode == 'en'
+                      ? const Locale('ar')
+                      : const Locale('en');
               Get.updateLocale(newLocale);
+              print("Language changed to: ${newLocale.languageCode}");
             },
+            child: Text(
+              "English".tr,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
+          const SizedBox(width: 10),
         ],
       ),
       body: SafeArea(
@@ -247,11 +282,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    userName.isNotEmpty ? "Hello, $userName" : "Hello",
-                    style: const TextStyle(
+                    userName.isNotEmpty ? "Hello, $userName" : "Hello".tr,
+                    style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color:
+                          themeController.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 5),
@@ -259,49 +297,41 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 20),
 
-              // مربع البحث
+              // Search box will be added here
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 253, 252, 252),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color.fromARGB(
-                        255,
-                        128,
-                        104,
-                        170,
-                      ).withOpacity(0.1),
-                      blurRadius: 1,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                  border: Border.all(color: Colors.black),
+                  color: Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextField(
                   controller: _searchController,
-                  decoration: const InputDecoration(
-                    icon: Icon(
-                      Icons.search,
-                      color: Color.fromARGB(255, 90, 34, 187),
-                    ),
-                    hintText: "Search",
-                    hintStyle: TextStyle(color: Colors.grey),
+                  decoration: InputDecoration(
+                    hintText: "Search doctors...".tr,
                     border: InputBorder.none,
+                    icon: const Icon(Icons.search),
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
+              Divider(
+                color:
+                    themeController.isDarkMode
+                        ? Colors.white70
+                        : Colors.black26,
+                thickness: 1,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Departments",
+                  Text(
+                    "Departments".tr,
                     style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 20,
+                      color:
+                          themeController.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
+                      fontSize: 17,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -315,10 +345,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     child: Text(
-                      "See All",
+                      "See All".tr,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.purple,
+                        color:
+                            themeController.isDarkMode
+                                ? Colors.white
+                                : Colors
+                                    .purple
+                                    .shade700, // استخدام اللون البنفسجي
                       ),
                     ),
                   ),
@@ -331,7 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
 
                 if (categoryController.categories.isEmpty) {
-                  return const Center(child: Text("لا توجد تصنيفات متاحة"));
+                  return Center(child: Text("لا توجد تصنيفات متاحة".tr));
                 }
 
                 return SizedBox(
@@ -381,10 +416,13 @@ class _HomeScreenState extends State<HomeScreen> {
               }),
 
               const SizedBox(height: 30),
-              const Text(
-                "Upcoming Schedule",
+              Text(
+                "Upcoming Schedule".tr,
                 style: TextStyle(
-                  color: Colors.black87,
+                  color:
+                      themeController.isDarkMode
+                          ? Colors.white
+                          : Colors.black87,
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
                 ),
@@ -396,10 +434,13 @@ class _HomeScreenState extends State<HomeScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    "Popular Doctors",
+                  Text(
+                    "Popular Doctors".tr,
                     style: TextStyle(
-                      color: Colors.black87,
+                      color:
+                          themeController.isDarkMode
+                              ? Colors.white
+                              : Colors.black87,
                       fontSize: 20,
                       fontWeight: FontWeight.w900,
                     ),
@@ -413,10 +454,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     },
                     child: Text(
-                      "See All",
+                      "See All".tr,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.purple,
+                        color:
+                            themeController.isDarkMode
+                                ? Colors.white
+                                : Colors
+                                    .purple
+                                    .shade700, // استخدام اللون البنفسجي
                       ),
                     ),
                   ),
@@ -449,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
 Widget buildStackedVerticalCards() {
   final List<Map<String, dynamic>> scheduleList = [
     {
-      "name": "Prof. Dr. Logan Mason",
+      "name": "Dr.MHmd",
       "specialty": "Dentist",
       "date": "June 12, 9:30 AM",
       "image": "assets/images/a.jpg",
@@ -500,7 +546,10 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       gradient: LinearGradient(
-        colors: [Colors.purple.shade600, Colors.purpleAccent.shade100],
+        colors:
+            themeController.isDarkMode
+                ? [Colors.purple.shade600, Colors.purpleAccent.shade100]
+                : [Colors.purple.shade600, Colors.purpleAccent.shade100],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
@@ -519,7 +568,7 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
         Row(
           children: [
             CircleAvatar(
-              radius: 24,
+              radius: 35,
               backgroundImage: AssetImage(schedule["image"]),
             ),
             const SizedBox(width: 12),
@@ -537,7 +586,12 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
                   ),
                   Text(
                     schedule["specialty"],
-                    style: const TextStyle(color: Colors.white70, fontSize: 13),
+                    style: TextStyle(
+                      color:
+                          themeController.isDarkMode
+                              ? Colors.grey[900]
+                              : Colors.white,
+                    ),
                   ),
                 ],
               ),
@@ -552,7 +606,7 @@ Widget buildScheduleCard(Map<String, dynamic> schedule) {
 
           children: [
             buildDatePill(Icons.calendar_today, date),
-            buildDatePill(Icons.calendar_today, date),
+
             if (time.isNotEmpty) ...[
               const SizedBox(width: 1),
               buildDatePill(Icons.access_time, time),
@@ -568,14 +622,24 @@ Widget buildDatePill(IconData icon, String text) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
     decoration: BoxDecoration(
-      color: Colors.white.withOpacity(0.15),
+      color: themeController.isDarkMode ? Colors.black : Colors.white,
       borderRadius: BorderRadius.circular(30),
     ),
     child: Row(
       children: [
-        Icon(icon, color: Colors.white, size: 16),
+        Icon(
+          icon,
+          color: themeController.isDarkMode ? Colors.white : Colors.black87,
+          size: 16,
+        ),
         const SizedBox(width: 6),
-        Text(text, style: const TextStyle(color: Colors.white, fontSize: 13)),
+        Text(
+          text.tr,
+          style: TextStyle(
+            color: themeController.isDarkMode ? Colors.white : Colors.black87,
+            fontSize: 13,
+          ),
+        ),
       ],
     ),
   );
