@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:get/get.dart';
+import 'package:ondoctor/Screens/home.dart';
 import 'package:ondoctor/controllers/auth_controller.dart';
 
 import 'package:ondoctor/Screens/Auth/Password.dart';
@@ -23,6 +24,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+    backgroundColor:  themeController.isDarkMode ? Colors.grey[900] : Colors.white,
      body: 
        SingleChildScrollView(
         child: Column(
@@ -75,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
                               controller:emailController,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: "Email or Phone number",
+                                hintText: "Email or Phone number".tr,
                                 hintStyle: TextStyle(color: Colors.grey[700]),
                               ),
                             ),
@@ -88,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                               obscureText: true,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
-                                hintText: "Password",
+                                hintText: "Password".tr,
                                 hintStyle: TextStyle(color: Colors.grey[700]),
                               ),
                             ),
@@ -109,7 +111,7 @@ class _LoginPageState extends State<LoginPage> {
   MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),);
                         },
                       child: Text(
-                        "Forgot Password?",
+                        "Forgot Password?".tr,
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           color: Color.fromRGBO(143, 148, 251, 1),
@@ -138,7 +140,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: Center(
                           child: Text(
-                            "Login",
+                            "Login".tr,
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
@@ -155,7 +157,7 @@ class _LoginPageState extends State<LoginPage> {
                     duration: Duration(milliseconds: 2000),
                     child: Center(
                       child: Text(
-                        "Or",
+                        "Or".tr,
                         style: TextStyle(color: Colors.grey[700]),
                       ),
                     ),
@@ -179,7 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                            Text(
-                              "Login with Google",
+                              "Login with Google".tr,
                               style: TextStyle(
                                 color: Colors.grey[700],
                                 fontSize: 14,
@@ -206,7 +208,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children:[ Text(
-                        "Don't have an account?",
+                        "Don't have an account?".tr,
                         style: TextStyle(color: Colors.grey[700]),
                         
                       ),
@@ -219,11 +221,12 @@ class _LoginPageState extends State<LoginPage> {
 );
                         },
                         child: Text(
-                          " Sign Up",
+                          " SignUp".tr,
                           style: TextStyle(
                             color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
+                            fontFamily: 'Cairo',
                           ),
                         ),
                       ),

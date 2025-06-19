@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,16 +13,8 @@ import 'translations.dart'; // ⬅️ جديد
 
 // تأكد من المسار
 
-  
-
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-
-
-
 
   Get.put(AuthController());
   Get.put(ThemeController()); // ⬅️ إضافة الكنترولر الخاص بالثيم
@@ -59,17 +50,18 @@ class MyApp extends StatelessWidget {
       () => GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'OnDoctor',
-    
-  translations: AppTranslation(), // ✅ تفعيل الترجمة
-  locale: Get.locale ?? const Locale('en'), // ✅ ضبط اللغة الحالية
-  fallbackLocale: const Locale('en'), // ✅ تحديد لغة احتياطية
 
-// ✅ اللغة الاحتياطية
+        translations: AppTranslation(), // ✅ تفعيل الترجمة
+        locale: Get.locale ?? const Locale('en'), // ✅ ضبط اللغة الحالية
+        fallbackLocale: const Locale('en'), // ✅ تحديد لغة احتياطية
+        // ✅ اللغة الاحتياطية
         theme: ThemeData.light().copyWith(
-          textTheme: ThemeData.light().textTheme.apply(fontFamily: "Soudia"), // ⬅️ تعيين الخط
+          textTheme: ThemeData.light().textTheme.apply(
+            fontFamily: "Cairo", // ⬅️ تعيين الخط
+          ), // ⬅️ تعيين الخط
         ),
         darkTheme: ThemeData.dark().copyWith(
-          textTheme: ThemeData.dark().textTheme.apply(fontFamily: "Soudia"),
+          textTheme: ThemeData.dark().textTheme.apply(fontFamily: "Cairo"),
         ), // ⬅️ تعيين الخط للوضع الداكن
         themeMode: themeController.themeMode.value, // ⬅️ التحكم في الوضع
         initialRoute: '/',

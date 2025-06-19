@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:lottie/lottie.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -17,23 +18,27 @@ class _OnboardingPageState extends State<OnboardingPage> {
     {
       "title": "  Doctor مرحبًا بك في ",
       "subtitle": "منصة استشارات طبية سهلة وآمنة",
-      "image": "assets/images/3725530.jpg",
+      "image": "assets/animations/4.json",
+     
     },
     {
       "title": "احجز بسهولة",
-      "subtitle": "اختر تخصصك والطبيب المناسب واحجز موعدك فورًا",
-      "image": "assets/images/3725530.jpg",
+      "subtitle":"اختر طبيبك واحجز في ثوان",
+      "image": "assets/animations/aoSjpTo6Io.json",
     },
     {
-      "title": "تابع ملفك الطبي",
-      "subtitle": "راجع محادثاتك السابقة وتوصيات الأطباء",
-      "image": "assets/images/3725530.jpg",
+      "title": "سجل طبي آمن",
+      "subtitle": "راجع محادثاتك السابقة وتوصيات الأطباء في ملف طبي خاص",
+      "image": "assets/animations/mPpBkH4aIe.json",
     },
   ];
 
   void _finishOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("seen", true); // نستخدم نفس المفتاح اللي استخدمناه في main.dart
+    await prefs.setBool(
+      "seen",
+      true,
+    ); // نستخدم نفس المفتاح اللي استخدمناه في main.dart
 
     Get.offAllNamed('/home'); // أو: Get.offAll(() => Home());
   }
@@ -64,13 +69,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       children: [
                         Text(
                           page["title"]!,
-                          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: 15),
                         Text(
                           page["subtitle"]!,
-                          style: TextStyle(fontSize: 16, color: Colors.white70),
+                          style: TextStyle(fontSize: 16, color: Colors.white),
                           textAlign: TextAlign.center,
                         ),
                         SizedBox(height: 40),
@@ -79,7 +88,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             onPressed: _finishOnboarding,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 40,
+                                vertical: 12,
+                              ),
                             ),
                             child: Text(
                               "ابدأ الآن",
@@ -93,6 +105,26 @@ class _OnboardingPageState extends State<OnboardingPage> {
                       ],
                     ),
                   ),
+                  SizedBox(height: 20),
+                  // زر التالي
+                  if (_currentPage < _pages.length - 1)
+                    Positioned(
+                      bottom: 90,
+                      right: 30,
+                      child: FloatingActionButton(
+                        backgroundColor: Colors.white,
+                        onPressed: () {
+                          _controller.nextPage(
+                            duration: Duration(milliseconds: 500),
+                            curve: Curves.ease,
+                          );
+                        },
+                        child: Icon(
+                          Icons.arrow_forward,
+                          color: Colors.deepPurple,
+                        ),
+                      ),
+                    ),
                 ],
               );
             },
@@ -126,9 +158,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   width: _currentPage == index ? 16 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _currentPage == index
-                        ? Colors.white
-                        : Colors.white54,
+                    color:
+                        _currentPage == index ? Colors.white : Colors.white54,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -155,16 +186,14 @@ class TopHalfCircle extends StatelessWidget {
         height: MediaQuery.of(context).size.height * 0.56,
         color: Colors.white,
         width: double.infinity,
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover, 
-        ),
+        child:
+            imagePath.endsWith('.json')
+                ? Lottie.asset(imagePath, fit: BoxFit.contain)
+                : Image.asset(imagePath, fit: BoxFit.cover),
       ),
     );
   }
 }
-
-
 
 class BottomCurveClipper extends CustomClipper<Path> {
   @override
@@ -174,8 +203,10 @@ class BottomCurveClipper extends CustomClipper<Path> {
     path.lineTo(0, size.height - 60); // ابدأ من اليسار عند الارتفاع
 
     path.quadraticBezierTo(
-      size.width / 2, size.height, // نقطة التحكم للمنحنى
-      size.width, size.height - 60, // نهاية الخط الأيمن
+      size.width / 2,
+      size.height, // نقطة التحكم للمنحنى
+      size.width,
+      size.height - 60, // نهاية الخط الأيمن
     );
 
     path.lineTo(size.width, 0); // مباشرة للأعلى على اليمين

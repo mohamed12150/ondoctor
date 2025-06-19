@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:ondoctor/Screens/Auth/Login_page.dart';
 import 'package:ondoctor/Screens/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
@@ -271,13 +272,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.support_agent,
                         title: "الدعم الفني".tr,
                       ),
-                      _buildSettingsTile(
+                        _buildSettingsTile(
                         icon: Icons.logout,
                         title: "تسجيل الخروج".tr,
-                        subtitle: "تسجيل الخروج".tr,
+                        subtitle: "تسجيل الخروج من الحساب".tr,
                         iconColor: Colors.red,
                         textColor: Colors.red,
-                        onTap: _showLogoutConfirmation,
+                        onTap: () => Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                          ),
+                        ),
                       ),
                     ],
                   ),

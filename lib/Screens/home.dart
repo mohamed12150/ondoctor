@@ -4,7 +4,9 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ondoctor/Screens/appointments_screen.dart';
 import 'package:ondoctor/Screens/list_doctors.dart';
-import 'package:ondoctor/Screens/messages/listchat.dart';
+import 'package:ondoctor/Screens/messages/chat_data.dart';
+import 'package:ondoctor/Screens/messages/chat_list.dart';
+import 'package:ondoctor/Screens/nativation_page.dart';
 import 'package:ondoctor/Screens/profile_screen.dart';
 import 'package:ondoctor/controllers/theme_controller.dart';
 import 'package:ondoctor/widgets//category_item.dart';
@@ -216,7 +218,15 @@ class _HomeScreenState extends State<HomeScreen> {
             color: themeController.isDarkMode ? Colors.white : Colors.black87,
           ),
           onPressed: () {
-            // TODO: افتح صفحة الإشعارات
+           Get.dialog(
+      NotificationPopup(
+        notifications: List.generate(15, (i) => 'إشعار رقم ${i + 1}'),
+          
+      ),
+      barrierColor: Colors.black.withOpacity(0.3),
+      barrierDismissible: true,
+    );
+ // TODO: افتح صفحة الإشعارات
           },
         ),
         title: Text(
@@ -387,11 +397,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           loadingBuilder: (context, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return const SizedBox(
-                              height: 30,
+                              height: 500,
                               width: 30,
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  strokeWidth: 2,
+                                  strokeWidth: 5,
                                 ),
                               ),
                             );

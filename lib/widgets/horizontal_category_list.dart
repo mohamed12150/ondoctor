@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/category_controller.dart';
-import '../services/category_service.dart';
-import '../screens/category_page.dart';
 import '../widgets/category_item.dart'; // ← تأكد أنك مستورد هذا
 
 class HorizontalCategoryList extends StatelessWidget {
