@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ondoctor/Screens/onboarding/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'controllers/auth_controller.dart';
 import 'routes/app_routes.dart';
 import 'Screens/home.dart';
-import 'onboarding_page.dart';
+
 
 import 'Screens/Auth/Login_page.dart';
 import 'controllers/theme_controller.dart'; // ⬅️ جديد
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
     final token = prefs.getString('token');
 
     if (!seen) {
-      return OnboardingPage();
+      return OnboardingScreen();
     }
 
     if (token != null && token.isNotEmpty) {

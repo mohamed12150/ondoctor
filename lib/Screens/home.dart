@@ -4,10 +4,11 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:ondoctor/Screens/appointments_screen.dart';
 import 'package:ondoctor/Screens/list_doctors.dart';
-import 'package:ondoctor/Screens/messages/chat_data.dart';
+
 import 'package:ondoctor/Screens/messages/chat_list.dart';
 import 'package:ondoctor/Screens/nativation_page.dart';
-import 'package:ondoctor/Screens/profile_screen.dart';
+import 'package:ondoctor/Screens/profile/profile_screen.dart';
+
 import 'package:ondoctor/controllers/theme_controller.dart';
 import 'package:ondoctor/widgets//category_item.dart';
 import 'package:ondoctor/Screens/doctor_card.dart';
@@ -208,6 +209,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor:
+          themeController.isDarkMode ? Colors.black87 : Colors.white,
       appBar: AppBar(
         backgroundColor:
             themeController.isDarkMode ? Colors.grey[900] : Colors.white,
@@ -218,15 +221,14 @@ class _HomeScreenState extends State<HomeScreen> {
             color: themeController.isDarkMode ? Colors.white : Colors.black87,
           ),
           onPressed: () {
-           Get.dialog(
-      NotificationPopup(
-        notifications: List.generate(15, (i) => 'إشعار رقم ${i + 1}'),
-          
-      ),
-      barrierColor: Colors.black.withOpacity(0.3),
-      barrierDismissible: true,
-    );
- // TODO: افتح صفحة الإشعارات
+            Get.dialog(
+              NotificationPopup(
+                notifications: List.generate(15, (i) => 'إشعار رقم ${i + 1}'),
+              ),
+              barrierColor: Colors.black.withOpacity(0.3),
+              barrierDismissible: true,
+            );
+            // TODO: افتح صفحة الإشعارات
           },
         ),
         title: Text(
@@ -391,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: category.name,
                         iconWidget: Image.network(
                           category.iconUrl,
-                          height: 30,
+                          height: 35,
                           width: 30,
                           fit: BoxFit.contain,
                           loadingBuilder: (context, child, loadingProgress) {
@@ -425,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 10),
               Text(
                 "Upcoming Schedule".tr,
                 style: TextStyle(

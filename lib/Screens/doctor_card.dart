@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:ondoctor/Screens/home.dart';
 import '../models/doctor_model.dart';
 
 class DoctorCard extends StatelessWidget {
@@ -10,12 +11,11 @@ class DoctorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: themeController.isDarkMode ? Colors.black12 : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -37,9 +37,14 @@ class DoctorCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 32,
-                      backgroundImage: doctor.profileImage != null && doctor.profileImage!.isNotEmpty
-                          ? NetworkImage(doctor.fullImageUrl)
-                          : const AssetImage("assets/images/default_doctor.png") as ImageProvider,
+                      backgroundImage:
+                          doctor.profileImage != null &&
+                                  doctor.profileImage!.isNotEmpty
+                              ? NetworkImage(doctor.fullImageUrl)
+                              : const AssetImage(
+                                    "assets/images/default_doctor.png",
+                                  )
+                                  as ImageProvider,
                     ),
                     Positioned(
                       top: 4,
@@ -61,7 +66,10 @@ class DoctorCard extends StatelessWidget {
                   children: const [
                     Icon(Icons.star, size: 16, color: Colors.deepPurpleAccent),
                     SizedBox(width: 4),
-                    Text("4.8", style: TextStyle(color: Colors.deepPurple, fontSize: 13)),
+                    Text(
+                      "4.8",
+                      style: TextStyle(color: Colors.deepPurple, fontSize: 13),
+                    ),
                   ],
                 ),
               ],
@@ -75,12 +83,18 @@ class DoctorCard extends StatelessWidget {
               children: [
                 Text(
                   doctor.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   doctor.categories.map((c) => c.name).join(", "),
-                  style: const TextStyle(color: Color(0xFF888DA7),fontSize: 12.5),
+                  style: const TextStyle(
+                    color: Color(0xFF888DA7),
+                    fontSize: 12.5,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -89,10 +103,12 @@ class DoctorCard extends StatelessWidget {
                       onTap: () {
                         // الانتقال باستخدام GetX مثلاً
                         Get.toNamed('/appointment', arguments: doctor);
-
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
@@ -116,32 +132,17 @@ class DoctorCard extends StatelessWidget {
                     ),
 
                     const SizedBox(width: 15),
-                    InkWell(
-                      onTap: () {
-                        // نفذ إجراء عند الضغط
-                        print('تم الضغط على المحادثة');
-                      },
-                      child: _iconBadge(icon: LucideIcons.messageCircle, size: 19.5),
-                    ),
-                    const SizedBox(width: 6),
-                    InkWell(
-                      onTap: () {
-                        // مثلاً: أضف للطبيب للمفضلة
-                        print('تم الضغط على المفضلة');
-                      },
-                      child: _iconBadge(icon: Icons.favorite_border, size: 19.5),
-                    ),
                   ],
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  Widget _iconBadge({required IconData icon,required size}) {
+  Widget _iconBadge({required IconData icon, required size}) {
     return Container(
       padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(

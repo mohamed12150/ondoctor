@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class RegisterService {
 
-  static const String baseUrl = 'http://192.168.8.80:8000/api'; // Emulator لـ Laravel
+  static const String baseUrl = 'http://192.168.8.80:8000/api';  // Emulator لـ Laravel
 
 
   static Future<Map<String, dynamic>> register({

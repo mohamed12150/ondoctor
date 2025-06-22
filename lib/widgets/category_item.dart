@@ -19,7 +19,7 @@ class CategoryItem extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            height: 70,
+            height: 60,
             width: 70,
             margin: const EdgeInsets.symmetric(vertical: 6),
             decoration: BoxDecoration(
@@ -33,46 +33,28 @@ class CategoryItem extends StatelessWidget {
                 ),
               ],
             ),
-            child: Center(
-              child:
-                  iconWidget ??
-                  const Icon(
-                    Icons.medical_services,
-                    color: Color(0xFF6C63FF),
-                    size: 32,
-                  ),
-            ),
+          child: Center(
+            child:
+                iconWidget ??
+                const Icon(
+                  Icons.medical_services,
+                  color: Color(0xFF6C63FF),
+                  size: 32,
+                ),
           ),
-          const SizedBox(height: 6),
-          SizedBox(
-            width: 80,
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+        ),
+        
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 12,
+            
+            fontWeight: FontWeight.bold,
           ),
-          SizedBox(
-            width: 80, // أو حسب الحاجة
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-              
-                color: Colors.black87,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
+        ),
+      
+      ],
+  
       ),
     );
   }
