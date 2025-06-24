@@ -1,8 +1,11 @@
+import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
+import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 // أضف هذه المكتبة
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:ondoctor/Screens/appointments_screen.dart';
+import 'package:ondoctor/Screens/appointment.dart';
+
 import 'package:ondoctor/Screens/list_doctors.dart';
 
 import 'package:ondoctor/Screens/messages/chat_list.dart';
@@ -70,60 +73,42 @@ class _HomeState extends State<Home> {
   }
 
   // bottom navgtion bar
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            transitionBuilder: (child, animation) {
-              return FadeTransition(opacity: animation, child: child);
-            },
-            child: _screens[_selectedIndex],
-          ),
-          Positioned(
-            left: 30,
-            right: 24,
-            bottom: 16,
-            child: Container(
-              decoration: BoxDecoration(
-                color:
-                    themeController.isDarkMode
-                        ? Colors.grey[900]
-                        : Colors.white,
-                borderRadius: BorderRadius.circular(90),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.07),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(_icons.length, (index) {
-                  final isSelected = _selectedIndex == index;
-                  return GestureDetector(
-                    onTap: () => _onItemTapped(index),
-                    behavior: HitTestBehavior.translucent,
-                    child: Icon(
-                      _icons[index],
-                      color:
-                          isSelected
-                              ? Colors.purple.shade700
-                              : Colors.grey.shade400,
-                      size: isSelected ? 30 : 24,
-                    ),
-                  );
-                }),
-              ),
+      extendBody: true, // مهم لظهور الانحناء بشكل صحيح
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        transitionBuilder: (child, animation) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        child: _screens[_selectedIndex],
+      ),
+      bottomNavigationBar: CurvedNavigationBar(
+        index: _selectedIndex,
+        height: 70,
+        backgroundColor: Colors.transparent,
+        color:
+            themeController.isDarkMode ? Colors.grey[900]! : Colors.grey[200]!,
+        buttonBackgroundColor:
+            themeController.isDarkMode ? Colors.white : Colors.deepPurple,
+        animationCurve: Curves.easeInOut,
+        animationDuration: const Duration(milliseconds: 300),
+        items: List.generate(_icons.length, (index) {
+          return CurvedNavigationBarItem(
+            child: Icon(
+              _icons[index],
+              color: themeController.isDarkMode ? Colors.grey : Colors.black87,
             ),
-          ),
-        ],
+            label: "", // تقدر تضيف اسم الصفحة هنا لو حبيت
+          );
+        }),
+        onTap: (index) {
+          setState(() {
+            _onItemTapped(index);
+          });
+        },
       ),
     );
   }

@@ -82,7 +82,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
       appBar: AppBar(
         title: const Text('Appointments'),
         backgroundColor:
-        // استخدام الكنترولر الخاص بالثيم
+            // استخدام الكنترولر الخاص بالثيم
             themeController.isDarkMode ? Colors.grey[900] : Colors.white,
         centerTitle: true,
       ),

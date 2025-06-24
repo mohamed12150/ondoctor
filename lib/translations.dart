@@ -4,6 +4,14 @@ class AppTranslation extends Translations {
   @override
   Map<String, Map<String, String>> get keys => {
     'en': {
+      "ترقية الآن": "Upgrade Now",
+      "تغيير كلمة المرور": "Change Password",
+      "كلمة المرور الحالية": "Current Password",
+      "كلمة المرور الجديدة": "New Password",
+      "تأكيد كلمة المرور": "Confirm Password",
+      "حفظ التغييرات": "Save Changes",
+      "خطة الاشتراك": "Subscription Plan",
+
       'SignUp': 'SignUp',
       'Don\'t have an account?': 'Don\'t have an account?',
       'Login with Google': 'Login with Google',
@@ -36,6 +44,12 @@ class AppTranslation extends Translations {
       'Or': 'Or',
     },
     'ar': {
+      "ترقية الآن": "ترقية الآن",
+      "تغيير كلمة المرور": "تغيير كلمة المرور",
+      "كلمة المرور الحالية": "كلمة المرور الحالية",
+      "كلمة المرور الجديدة": "كلمة المرور الجديدة",
+      "تأكيد كلمة المرور": "تأكيد كلمة المرور",
+      "حفظ التغييرات": "حفظ التغييرات",
       'SignUp': 'تسجيل حساب جديد',
       'Don\'t have an account?': 'ليس لديك حساب؟',
       'Login with Google': 'تسجيل الدخول باستخدام جوجل',
@@ -66,6 +80,8 @@ class AppTranslation extends Translations {
       'Hello': 'مرحبا',
       'English': 'English',
       'See All': 'عرض الكل',
+      "تغيير كلمة المرور": "تغيير كلمة المرور",
+      "خطة الاشتراك": "خطة الاشتراك",
     },
   };
 }
