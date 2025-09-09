@@ -137,7 +137,7 @@ class DoctorsListPage extends StatelessWidget {
   Widget _buildDoctorCard(Doctor doctor) {
     return GestureDetector(
       onTap: () {
-        Get.toNamed('/appointment', arguments: doctor);
+        Get.toNamed('/appointment/${doctor.id}');
       },
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -178,9 +178,14 @@ class DoctorsListPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    doctor.specialization ?? 'غير محدد',
+                    doctor.categories.isNotEmpty
+                        ? (Get.locale?.languageCode == 'en'
+                        ? doctor.categories.first.nameEn
+                        : doctor.categories.first.nameAr)
+                        : 'غير محدد',
                     style: TextStyle(color: Colors.grey.shade600),
                   ),
+
                   const SizedBox(height: 6),
                   Row(
                     children: [

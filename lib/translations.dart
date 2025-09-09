@@ -42,6 +42,12 @@ class AppTranslation extends Translations {
       "الدعم الفني": "Technical Support",
       "تسجيل الخروج": "Logout",
       'Or': 'Or',
+      'edit_profile': 'Edit Profile',
+      'save_changes': 'Save Changes',
+      'name': 'Name',
+      'email': 'Email',
+      'profile_updated': 'Profile updated successfully',
+      'error': 'Something went wrong',
     },
     'ar': {
       "ترقية الآن": "ترقية الآن",
@@ -82,6 +88,12 @@ class AppTranslation extends Translations {
       'See All': 'عرض الكل',
       "تغيير كلمة المرور": "تغيير كلمة المرور",
       "خطة الاشتراك": "خطة الاشتراك",
+      'edit_profile': 'تعديل الملف الشخصي',
+      'save_changes': 'حفظ التغييرات',
+      'name': 'الاسم',
+      'email': 'البريد الإلكتروني',
+      'profile_updated': 'تم تحديث الملف الشخصي بنجاح',
+      'error': 'حدث خطأ',
     },
   };
 }

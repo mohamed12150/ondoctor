@@ -1,29 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ondoctor/Screens/messages/chat_controller.dart';
+import '../../controllers/chat_detail_controller.dart';
+import '../../models/chat_room_model.dart';
+import '../../controllers/chat_room_controller.dart';
 
 class ChatDetailScreen extends StatelessWidget {
   final String chatId;
+
   ChatDetailScreen({super.key, required this.chatId});
 
-  final ChatController controller = Get.find();
+  final ChatRoomController chatRoomController = Get.find();
   final TextEditingController textController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final chat = controller.getChatById(chatId);
+    final chat = chatRoomController.getRoomById(chatId)!;
+    final controller = Get.find<ChatDetailController>();
 
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(backgroundImage: AssetImage(chat.avatar)),
+            CircleAvatar(
+              backgroundImage: chat.avatar.startsWith('http')
+                  ? NetworkImage(chat.avatar)
+                  : const AssetImage('assets/images/a.jpg') as ImageProvider,
+            ),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(chat.doctorName, style: const TextStyle(fontSize: 16)),
+                Text(chat.name, style: const TextStyle(fontSize: 16)),
                 Text(
                   chat.isOnline ? 'متصل' : 'غير متصل',
                   style: TextStyle(
@@ -35,14 +43,6 @@ class ChatDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: () {
-              // تأكد أن chat يتم تمريره
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -50,26 +50,23 @@ class ChatDetailScreen extends StatelessWidget {
             child: Obx(() {
               return ListView.builder(
                 reverse: true,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 20,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
                 itemCount: controller.messages.length,
                 itemBuilder: (context, index) {
-                  final msg =
-                      controller.messages[controller.messages.length -
-                          1 -
-                          index];
-                  final isMe = msg['fromUser'] as bool;
+                  final msg = controller.messages[controller.messages.length - 1 - index];
+
+                  // final currentUserId =  controller.chatMessageService.getCurrentUserId();
+                  final isMe = msg.senderId == controller.currentUserId;
+
+                  print('isMe: $isMe, senderId: ${msg.senderId}, currentUserId: ${controller.currentUserId}');
+
+
+
                   return Align(
-                    alignment:
-                        isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 4),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                       constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.75,
                       ),
@@ -84,21 +81,19 @@ class ChatDetailScreen extends StatelessWidget {
                       ),
                       child: Column(
                         crossAxisAlignment:
-                            isMe
-                                ? CrossAxisAlignment.end
-                                : CrossAxisAlignment.start,
+                        isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                         children: [
                           Text(
-                            msg['text'],
-                            style: const TextStyle(fontSize: 15),
+                            msg.text,
+                            style: TextStyle(
+                              fontSize: 15,
+                              color: isMe ? Colors.white : Colors.black,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            msg['time'],
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[600],
-                            ),
+                            msg.time,
+                            style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                           ),
                         ],
                       ),
@@ -116,7 +111,7 @@ class ChatDetailScreen extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.attach_file),
                   onPressed: () {
-                    // TODO: اختر صورة باستخدام image_picker مثلاً
+                    // TODO: دعم المرفقات لاحقًا
                   },
                 ),
                 Expanded(
@@ -127,10 +122,7 @@ class ChatDetailScreen extends StatelessWidget {
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
                   ),
                 ),

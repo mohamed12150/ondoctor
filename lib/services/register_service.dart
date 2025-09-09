@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 
 class RegisterService {
 
-  static const String baseUrl = 'http://192.168.8.80:8000/api';  // Emulator لـ Laravel
+  static const String baseUrl = 'http://10.0.2.2:8000/api';  // Emulator لـ Laravel
+  // static const String baseUrl = 'http://192.168.8.28:8000/api';  // Emulator لـ Laravel
 
 
   static Future<Map<String, dynamic>> register({
@@ -13,6 +14,7 @@ class RegisterService {
     required String password,
     required String confirmPassword,
     required String dateOfBirth,
+    required String role,
   }) async {
     final url = Uri.parse('$baseUrl/register');
 
@@ -26,13 +28,21 @@ class RegisterService {
         'password': password,
         'password_confirmation': confirmPassword,
         'date_of_birth': dateOfBirth,
+        'role': role,
       },
     );
 
-    if (response.statusCode == 201) {
-      return json.decode(response.body);
+    print("Sending role as: $role (${role.runtimeType})");
+    print("Response status: ${response.statusCode}");
+    print("Raw body: ${response.body}");
+
+    final r = json.decode(response.body);
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return r;
     } else {
-      throw Exception(json.decode(response.body)['message'] ?? 'Registration failed');
+      final message = r['message'] ?? 'Registration failed';
+      throw Exception(message);
     }
   }
 }

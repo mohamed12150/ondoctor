@@ -23,6 +23,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
+  String _role = 'doctor'; // patient أو doctor
+
 
   DateTime? _selectedDate;
   bool _agreeToTerms = false;
@@ -55,8 +57,26 @@ class _SignUpPageState extends State<SignUpPage> {
           password: passwordController.text.trim(),
           confirmPassword: confirmPasswordController.text.trim(),
           dateOfBirth: _selectedDate!.toIso8601String().split('T')[0],
+          role: _role,
         );
 
+        print("🔹 Result: $result");
+
+        // ✅ حالة OTP
+        if (result['status'] == 'otp_sent') {
+          Get.snackbar("تحقق مطلوب", result['message'] ?? "تم إرسال رمز التحقق");
+          Get.toNamed('/otp', arguments: {
+            'identifier': result['channel'] == 'email'
+                ? emailController.text.trim()
+                : phoneController.text.trim(),
+            'password': passwordController.text.trim(),
+            'channel': result['channel'],
+            'dest': result['dest'],
+          });
+          return;
+        }
+
+        // ✅ حالة نجاح عادي
         Get.snackbar("نجاح", "تم إنشاء الحساب بنجاح");
         Get.offAllNamed('/login');
 
@@ -69,6 +89,7 @@ class _SignUpPageState extends State<SignUpPage> {
       Get.snackbar("تنبيه", "يرجى اختيار تاريخ الميلاد");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -88,6 +109,10 @@ class _SignUpPageState extends State<SignUpPage> {
                   style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                 ),
               ),
+               _buildRoleSelector(),
+
+
+
               const SizedBox(height: 20),
               _buildTextField("Full Name", controller: nameController),
               _buildTextField("Email", controller: emailController),
@@ -272,4 +297,50 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+  Widget _buildRoleSelector() {
+    final options = const {
+      'patient': 'مريض',
+      'doctor' : 'طبيب',
+    };
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 10),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3E8FF), // بنفسجي فاتح
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.deepPurple.shade200),
+        ),
+        padding: const EdgeInsets.all(6),
+        child: Row(
+          children: options.entries.map((e) {
+            final selected = _role == e.key;
+            return Expanded(
+              child: GestureDetector(
+                onTap: () => setState(() => _role = e.key),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: selected ? Colors.deepPurple : Colors.transparent,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    e.value,
+                    style: TextStyle(
+                      color: selected ? Colors.white : Colors.deepPurple,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
 }

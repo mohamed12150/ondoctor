@@ -18,7 +18,7 @@ class CategoryController extends GetxController {
       final fetched = await CategoryService.fetchCategories();
       categories.assignAll(fetched);
       for (var cat in categories) {
-        print('ID: ${cat.id}, Name: ${cat.name}, Icon: ${cat.iconUrl}');
+        print('ID: ${cat.id}, Name: ${cat.nameEn}, Icon: ${cat.iconUrl}');
       }
 // مباشرة بدون map
 

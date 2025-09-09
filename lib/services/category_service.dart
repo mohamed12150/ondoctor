@@ -4,8 +4,8 @@ import '../models/category_model.dart';
 class CategoryService {
 
 
-  static const baseUrl = 'http://192.168.8.80:8000/api';
-
+  static const baseUrl = 'http://10.0.2.2:8000/api';
+  // static const baseUrl = 'http://192.168.8.28:8000/api';
 
 
 
@@ -18,6 +18,7 @@ class CategoryService {
       return List<Map<String, dynamic>>.from(data['data'])
           .map((e) => Category.fromJson(e))
           .toList();
+
     } else {
       throw Exception('فشل في جلب التصنيفات');
     }

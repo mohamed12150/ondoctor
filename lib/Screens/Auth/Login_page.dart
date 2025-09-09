@@ -7,7 +7,6 @@ import 'package:ondoctor/controllers/auth_controller.dart';
 import 'package:ondoctor/Screens/Auth/Password.dart';
 import 'package:ondoctor/Screens/Auth/siginup.dart';
 
-
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -20,18 +19,16 @@ class _LoginPageState extends State<LoginPage> {
   final passwordController = TextEditingController();
   final authController = Get.put(AuthController());
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-    backgroundColor:  themeController.isDarkMode ? Colors.grey[900] : Colors.white,
-     body: 
-       SingleChildScrollView(
+      backgroundColor:
+          themeController.isDarkMode ? Colors.grey[900] : Colors.white,
+      body: SingleChildScrollView(
         child: Column(
           children: [
-          
-        SizedBox(height:15 ,),
-         SizedBox(
+            SizedBox(height: 15),
+            SizedBox(
               height: 355,
               child: Image.asset(
                 "assets/images/DeWatermark.ai_1746715065362.png",
@@ -74,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                             child: TextField(
-                              controller:emailController,
+                              controller: emailController,
                               decoration: InputDecoration(
                                 border: InputBorder.none,
                                 hintText: "Email or Phone number".tr,
@@ -106,24 +103,30 @@ class _LoginPageState extends State<LoginPage> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () {
-                             Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (context) => const ForgotPasswordPage()),);
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const ForgotPasswordPage(),
+                            ),
+                          );
                         },
-                      child: Text(
-                        "Forgot Password?".tr,
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: Color.fromRGBO(143, 148, 251, 1),
+                        child: Text(
+                          "Forgot Password?".tr,
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            color: Color.fromRGBO(143, 148, 251, 1),
+                          ),
                         ),
                       ),
                     ),
-                  ),), //forget you password
+                  ), //forget you password
                   SizedBox(height: 10),
                   FadeInUp(
                     duration: Duration(milliseconds: 1900),
-                    child: GestureDetector(
-                      onTap: () {
+                    child: Obx(() => GestureDetector(
+                      onTap: authController.isLoading.value
+                          ? null
+                          : () {
                         final email = emailController.text.trim();
                         final password = passwordController.text.trim();
                         if (email.isNotEmpty && password.isNotEmpty) {
@@ -139,7 +142,16 @@ class _LoginPageState extends State<LoginPage> {
                           color: Colors.deepPurple,
                         ),
                         child: Center(
-                          child: Text(
+                          child: authController.isLoading.value
+                              ? SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.5,
+                            ),
+                          )
+                              : Text(
                             "Login".tr,
                             style: TextStyle(
                               color: Colors.white,
@@ -149,8 +161,9 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                    ),
+                    )),
                   ),
+
 
                   SizedBox(height: 10),
                   FadeInUp(
@@ -163,73 +176,73 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  
-                  FadeInUp(
-                    duration: Duration(milliseconds: 2000),
-                    child: GestureDetector(
-                      onTap: () {
-                      },
-                      child: Container(
-                        alignment: Alignment.center,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                           Text(
-                              "Login with Google".tr,
-                              style: TextStyle(
-                                color: Colors.grey[700],
-                                fontSize: 14,
-                              ),
-                            ),
+                  // !lofgin with google
 
-                            SizedBox(width: 10),
-                            
-                            Image.asset(
-                              "assets/images/search.png",
-                              height: 20,
-                              width: 20,
-                              
-                            ),
-                          ],
-                        ),
-                        
-                      ),
-                    ),
-                  ),
+                  // FadeInUp(
+                  //   duration: Duration(milliseconds: 2000),
+                  //   child: GestureDetector(
+                  //     onTap: () {},
+                  //     child: Container(
+                  //       alignment: Alignment.center,
+                  //       height: 40,
+                  //       decoration: BoxDecoration(
+                  //         border: Border.all(color: Colors.grey),
+                  //         borderRadius: BorderRadius.circular(10),
+                  //       ),
+                  //       padding: EdgeInsets.symmetric(horizontal: 12),
+                  //       child: Row(
+                  //         mainAxisSize: MainAxisSize.min,
+                  //         children: [
+                  //           Text(
+                  //             "Login with Google".tr,
+                  //             style: TextStyle(
+                  //               color: Colors.grey[700],
+                  //               fontSize: 14,
+                  //             ),
+                  //           ),
+                  //
+                  //           SizedBox(width: 10),
+                  //
+                  //           Image.asset(
+                  //             "assets/images/search.png",
+                  //             height: 20,
+                  //             width: 20,
+                  //           ),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(height: 20),
                   FadeInUp(
                     duration: Duration(milliseconds: 2000),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children:[ Text(
-                        "Don't have an account?".tr,
-                        style: TextStyle(color: Colors.grey[700]),
-                        
-                      ),
+                      children: [
+                        Text(
+                          "Don't have an account?".tr,
+                          style: TextStyle(color: Colors.grey[700]),
+                        ),
 
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(builder: (context) => const SignUpPage()),
-);
-                        },
-                        child: Text(
-                          " SignUp".tr,
-                          style: TextStyle(
-                            color: Colors.deepPurple,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            fontFamily: 'Cairo',
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SignUpPage(),
+                              ),
+                            );
+                          },
+                          child: Text(
+                            " SignUp".tr,
+                            style: TextStyle(
+                              color: Colors.deepPurple,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              fontFamily: 'Cairo',
+                            ),
                           ),
                         ),
-                      ),
                       ],
                     ),
                   ),
@@ -240,6 +253,5 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
     );
-    
   }
 }

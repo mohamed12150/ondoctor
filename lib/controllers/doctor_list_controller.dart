@@ -35,13 +35,20 @@ class DoctorListController extends GetxController {
 
   void _extractSpecialties() {
     final specialties = _originalDoctors
-        .map((doctor) => doctor.specialization ?? 'غير محدد')
+        .map((doctor) {
+      if (doctor.categories.isNotEmpty) {
+        return doctor.categories.first.nameAr ?? 'غير محدد';
+      } else {
+        return 'غير محدد';
+      }
+    })
         .toSet()
         .toList();
 
     specialties.sort();
     _availableSpecialties = ['الكل'] + specialties;
   }
+
 
   List<String> get availableSpecialties => _availableSpecialties;
 
@@ -51,10 +58,17 @@ class DoctorListController extends GetxController {
     // 1. تطبيق فلترة البحث النصي
     if (searchQuery.isNotEmpty) {
       tempDoctors = tempDoctors.where((doctor) {
-        return doctor.name.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
-            (doctor.specialization?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false);
+        final nameMatch = doctor.name?.toLowerCase().contains(searchQuery.value.toLowerCase());
+
+        final categoryMatch = doctor.categories.any((cat) =>
+        cat.nameEn.toLowerCase().contains(searchQuery.value.toLowerCase()) ||
+            (cat.nameAr?.toLowerCase().contains(searchQuery.value.toLowerCase()) ?? false)
+        );
+
+        return nameMatch! || categoryMatch;
       }).toList();
     }
+
 
     // 2. تطبيق فلترة التقييم
     if (minRating.value > 0) {

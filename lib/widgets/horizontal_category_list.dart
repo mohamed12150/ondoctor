@@ -6,9 +6,7 @@ import '../widgets/category_item.dart'; // ← تأكد أنك مستورد هذ
 class HorizontalCategoryList extends StatelessWidget {
   final controller = Get.find<CategoryController>();
 
-   HorizontalCategoryList({super.key});
-
-   
+  HorizontalCategoryList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +29,12 @@ class HorizontalCategoryList extends StatelessWidget {
           itemBuilder: (context, index) {
             final cat = categories[index];
             return CategoryItem(
-              title: cat.name,
-              iconWidget: cat.iconUrl != null
-                  ? Image.network(cat.iconUrl, height: 28, width: 28)
-                  : const Icon(Icons.category),
+              title: Get.locale?.languageCode == 'en' ? cat.nameEn : cat.nameAr,
+
+              iconWidget:
+                  cat.iconUrl != null
+                      ? Image.network(cat.iconUrl, height: 28, width: 28)
+                      : const Icon(Icons.category),
               onTap: () {
                 // Navigate to category details page
               },
@@ -45,4 +45,3 @@ class HorizontalCategoryList extends StatelessWidget {
     });
   }
 }
-

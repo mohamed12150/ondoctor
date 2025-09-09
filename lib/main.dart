@@ -17,8 +17,8 @@ import 'translations.dart'; // ⬅️ جديد
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  Get.put(AuthController());
-  Get.put(ThemeController()); // ⬅️ إضافة الكنترولر الخاص بالثيم
+  Get.lazyPut(() => AuthController(), fenix: true);
+  Get.lazyPut(() => ThemeController(), fenix: true); // ⬅️ إضافة الكنترولر الخاص بالثيم
 
   runApp(const MyApp());
 }
@@ -49,6 +49,7 @@ class MyApp extends StatelessWidget {
 
     return Obx(
       () => GetMaterialApp(
+
         debugShowCheckedModeBanner: false,
         title: 'OnDoctor',
 

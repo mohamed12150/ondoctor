@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ondoctor/screens/profile/profile_controller.dart';
+// import 'package:ondoctor/screens/profile/profile_controller.dart';
 import 'package:ondoctor/Screens/profile/widgets/profile_card.dart';
-
 import 'package:ondoctor/screens/home.dart';
 import 'package:ondoctor/screens/profile/widgets/settings_tile.dart';
-
 import 'package:get/get.dart';
-
+import '../../controllers/profile_controller.dart';
 import 'widgets/settings_section.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -17,12 +15,20 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final ProfileController _controller = ProfileController();
+  final profileController = Get.find<ProfileController>();
+  final currentPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
+
+
 
   @override
   void initState() {
     super.initState();
-    _controller.loadUserData();
+    profileController.loadUserData();
+
+      // userName = prefs.getString('userName') ?? '';
+
   }
 
   @override
@@ -43,7 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           foregroundColor: Colors.deepPurple,
         ),
         body: RefreshIndicator(
-          onRefresh: () async => _controller.loadUserData(),
+          onRefresh: () async => profileController.loadUserData(),
           child: SingleChildScrollView(
             physics: const AlwaysScrollableScrollPhysics(
               parent: BouncingScrollPhysics(),
@@ -52,10 +58,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  ProfileCard(
-                    controller: _controller,
-                    onAvatarChanged: _controller.changeAvatar,
+                  GetBuilder<ProfileController>(
+                    builder: (controller) => ProfileCard(
+                      controller: controller,
+                      onAvatarChanged: controller.changeAvatar,
+                    ),
                   ),
+
                   const SizedBox(height: 30),
                   SettingsSection(
                     title: "الإعدادات العامة".tr,
@@ -64,9 +73,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icons.local_hospital_outlined,
                         title: "الأمراض المزمنة".tr,
                         subtitle: "إدارة الأمراض المزمنة".tr,
-                        onTap:
-                            () =>
-                                _controller.openChronicDiseasesScreen(context),
+                        onTap: () => Get.toNamed('/chronic-diseases'),
                       ),
                       SettingsTile(
                         icon: Icons.workspace_premium_outlined,
@@ -166,6 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       const SizedBox(height: 20),
                                       TextField(
+                                        controller: currentPasswordController,
                                         obscureText: true,
                                         decoration: InputDecoration(
                                           labelText: "كلمة المرور الحالية".tr,
@@ -174,6 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       const SizedBox(height: 10),
                                       TextField(
+                                        controller: newPasswordController,
                                         obscureText: true,
                                         decoration: InputDecoration(
                                           labelText: "كلمة المرور الجديدة".tr,
@@ -182,6 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       const SizedBox(height: 10),
                                       TextField(
+                                        controller: confirmPasswordController,
                                         obscureText: true,
                                         decoration: InputDecoration(
                                           labelText: "تأكيد كلمة المرور".tr,
@@ -191,14 +201,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       const SizedBox(height: 20),
                                       Center(
                                         child: ElevatedButton.icon(
-                                          onPressed: () {
-                                            // تنفيذ تغيير كلمة المرور
-                                            Navigator.pop(context);
+                                          onPressed: () async {
+                                            final current = currentPasswordController.text.trim();
+                                            final newPass = newPasswordController.text.trim();
+                                            final confirm = confirmPasswordController.text.trim();
+
+                                            if (newPass != confirm) {
+                                              Get.snackbar('خطأ', 'كلمة المرور الجديدة غير متطابقة');
+                                              return;
+                                            }
+
+                                            try {
+                                              await profileController.changePassword(
+                                                currentPassword: current,
+                                                newPassword: newPass,
+                                                confirmPassword: confirm,
+                                              );
+
+
+                                              Navigator.pop(context);
+                                              Get.snackbar('تم', 'تم تغيير كلمة المرور بنجاح');
+                                            } catch (e) {
+                                              Get.snackbar('خطأ', e.toString(),
+                                                backgroundColor: Colors.red.shade100,
+                                              );
+                                            }
                                           },
                                           icon: const Icon(Icons.lock_reset),
                                           label: Text("حفظ التغييرات".tr),
                                         ),
+
                                       ),
+
                                     ],
                                   ),
                                 ),
@@ -218,7 +252,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         iconColor: Colors.red,
                         textColor: Colors.red,
                         onTap:
-                            () => _controller.showLogoutConfirmation(context),
+                            () => profileController.showLogoutConfirmation(context),
                       ),
                     ],
                   ),

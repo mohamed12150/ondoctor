@@ -17,8 +17,10 @@ import 'package:ondoctor/widgets//category_item.dart';
 import 'package:ondoctor/Screens/doctor_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:card_swiper/card_swiper.dart';
+import '../controllers/chat_room_controller.dart';
 import '../controllers/doctor_controller.dart';
 import '../controllers/category_controller.dart';
+import '../controllers/profile_controller.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -43,9 +45,16 @@ class _HomeState extends State<Home> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const AppointmentPage(),
-    ChatListScreen(),
-    const ProfileScreen(),
+    GetBuilder<ChatRoomController>(
+      init: ChatRoomController(),
+      builder: (_) => ChatListScreen(),
+    ),
+    GetBuilder<ProfileController>(
+      init: ProfileController(),
+      builder: (_) => ProfileScreen(),
+    ),
   ];
+
 
   void _onItemTapped(int index) async {
     if (index == 3 || index == 1 || index == 2) {
@@ -147,7 +156,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // نسخة من الأطباء لعرضها مع إمكانية الفلترة
   late List<Map<String, dynamic>> filteredDoctors;
   String userName = ''; // ✅ لعرض اسم المستخدم
-
+  String role = '';
   // للتحكم في TextField
   final TextEditingController _searchController = TextEditingController();
   final ThemeController themeController = Get.find<ThemeController>();
@@ -188,6 +197,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       userName = prefs.getString('userName') ?? '';
+       role =prefs.getString('role') ?? '';
     });
   }
 
@@ -295,6 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 20),
 
               // Search box will be added here
+              if (role != 'doctor')
               Container(
                 decoration: BoxDecoration(
                   color: Colors.grey[100],
@@ -318,6 +329,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         : Colors.black26,
                 thickness: 1,
               ),
+              if (role != 'doctor')
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -357,7 +369,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-              Obx(() {
+              if (role != 'doctor')
+                Obx(() {
                 if (categoryController.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -375,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       final category = categoryController.categories[index];
 
                       return CategoryItem(
-                        title: category.name,
+                        title: category.getLocalizedName(),
                         iconWidget: Image.network(
                           category.iconUrl,
                           height: 35,
@@ -398,7 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onTap: () {
                           print(
-                            'Category Tapped: id=${category.id}, name=${category.name}, iconUrl=${category.iconUrl}',
+                            'Category Tapped: id=${category.id}, name=${category.getLocalizedName()}, iconUrl=${category.iconUrl}',
                           );
 
                           // Get.toNamed('/categories', arguments: {
@@ -413,6 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
               }),
 
               const SizedBox(height: 10),
+              if (role != 'doctor')
               Text(
                 "Upcoming Schedule".tr,
                 style: TextStyle(
@@ -425,9 +439,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 10),
+              if (role != 'doctor')
               buildStackedVerticalCards(), // ✅ هذا هو الويدجت الصحيح
 
               const SizedBox(height: 30),
+              if (role != 'doctor')
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -466,7 +482,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               const SizedBox(height: 10),
-
+              if (role != 'doctor')
               // عرض الأطباء حسب الفلترة
               Obx(() {
                 return Column(

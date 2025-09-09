@@ -10,6 +10,7 @@ class DoctorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(doctor);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       padding: const EdgeInsets.all(16),
@@ -87,21 +88,27 @@ class DoctorCard extends StatelessWidget {
                     fontSize: 16,
                   ),
                 ),
+
                 const SizedBox(height: 4),
                 Text(
-                  doctor.categories.map((c) => c.name).join(", "),
-                  style: const TextStyle(
-                    color: Color(0xFF888DA7),
-                    fontSize: 12.5,
-                  ),
+                    doctor.categories.map((c) {
+                      final lang = Get.locale?.languageCode ?? 'ar';
+                      return lang == 'en' ? c.nameEn : c.nameAr;
+                    }).join(", ")
+
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     InkWell(
+
                       onTap: () {
+                        // print(doctor.id);
                         // الانتقال باستخدام GetX مثلاً
-                        Get.toNamed('/appointment', arguments: doctor);
+                        print(doctor.id);
+                        Get.toNamed('/appointment/${doctor.id}');
+
+
                       },
                       child: Container(
                         padding: const EdgeInsets.symmetric(

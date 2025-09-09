@@ -18,9 +18,10 @@ class DoctorController extends GetxController {
     try {
       final doctors = await DoctorService.fetchPopularDoctors();
       popularDoctors.value = doctors;
-      //print(doctors);
-    } catch (e) {
-      print('Error fetching doctors: $e');
+       print(doctors);
+    } catch (e, stackTrace) {
+      print('❌ Error fetching doctors: ${e.toString()}');
+      print('📌 Stack trace:\n$stackTrace');
     } finally {
       isLoading(false);
     }

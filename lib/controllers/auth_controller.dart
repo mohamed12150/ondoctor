@@ -12,43 +12,78 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      final data = await _authService.login(email, password);
+      final res = await _authService.login(email, password);
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['token']);
+      if (res['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', res['token']);
+        await prefs.setString('user_id', res['user']['id'].toString());
+        await prefs.setString('role', res['user']['role'].toString());
+        Get.snackbar('Welcome', 'Logged in successfully');
+        Get.offAllNamed('/home');
+        return;
+      }
 
-      Get.snackbar(' Welcome', 'Logged in successfully');
-      Get.offAllNamed('/home');
+      if (res['otp'] == true) {
+        Get.snackbar('تحقق مطلوب', 'تم إرسال رمز التحقق');
+        Get.toNamed('/otp', arguments: {
+          'identifier': email,
+          'password': password, // عشان بعد التحقق نعيد محاولة الدخول تلقائياً
+          'channel': res['channel'],
+          'dest': res['dest'],
+        });
+        return;
+      }
+
+      Get.snackbar('فشل تسجيل الدخول', 'حاول مرة أخرى');
     } catch (e) {
-      Get.snackbar(
-        ' فشل تسجيل الدخول',
-        e.toString(),
-        snackPosition: SnackPosition.TOP,
-        duration: Duration(seconds: 3),
-      );
+      Get.snackbar('فشل تسجيل الدخول', e.toString(),
+          snackPosition: SnackPosition.TOP, duration: const Duration(seconds: 3));
     } finally {
       isLoading.value = false;
     }
   }
+
 
   // تسجيل مستخدم جديد
   Future<void> register(String name, String email, String password) async {
     try {
       isLoading.value = true;
 
-      final data = await _authService.register(name, email, password);
+      final res = await _authService.register(name, email, password);
+      print(res);
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', data['token']);
+      if (res['otp'] == true) {
+        // ✅ حالة OTP
+        Get.snackbar('تحقق مطلوب', 'تم إرسال رمز التحقق');
+        Get.toNamed('/otp', arguments: {
+          'identifier': email,
+          'password': password, // لإعادة المحاولة بعد التحقق
+          'channel': res['channel'],
+          'dest': res['dest'],
+        });
+        return;
+      }
 
-      Get.snackbar(' Registered', 'Account created');
-      Get.offAllNamed('/home');
+      if (res['success'] == true) {
+        // ✅ نجاح عادي
+        Get.snackbar('تم التسجيل بنجاح', 'مرحباً بك!');
+        // ممكن تخزن التوكن أو تروح للصفحة الرئيسية
+        // final prefs = await SharedPreferences.getInstance();
+        // await prefs.setString('token', res['data']['token']);
+        Get.offAllNamed('/home');
+        return;
+      }
+
+      // ❌ لو ما كان OTP ولا نجاح
+      Get.snackbar('فشل انشاء الحساب', 'حاول مرة أخرى');
     } catch (e) {
-      Get.snackbar(' Register Failed', e.toString());
+      Get.snackbar('Register Failed', e.toString());
     } finally {
       isLoading.value = false;
     }
   }
+
 
   // تسجيل الخروج
   Future<void> logout() async {
@@ -74,6 +109,11 @@ class AuthController extends GetxController {
     }
 
     return true; // مسجل دخول
+  }
+
+  Future<String?> getRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('role');
   }
 
 }

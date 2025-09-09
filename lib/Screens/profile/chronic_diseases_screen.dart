@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../controllers/medical_condition_controller.dart';
+import '../../models/MedicalCondition.dart';
 
 class ChronicDiseasesScreen extends StatefulWidget {
   const ChronicDiseasesScreen({super.key});
@@ -9,22 +12,104 @@ class ChronicDiseasesScreen extends StatefulWidget {
 
 class _ChronicDiseasesScreenState extends State<ChronicDiseasesScreen> {
   final TextEditingController _diseaseController = TextEditingController();
-  final List<String> _diseases = [];
+  final TextEditingController _notesController = TextEditingController();
+  final controller = Get.find<MedicalConditionController>();
 
-  void _addDisease() {
-    final text = _diseaseController.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        _diseases.add(text);
-        _diseaseController.clear();
-      });
-    }
+
+  @override
+  void initState() {
+    super.initState();
+    controller.fetchConditions();
   }
 
-  void _removeDisease(int index) {
-    setState(() {
-      _diseases.removeAt(index);
-    });
+  void _showAddDialog() {
+    _diseaseController.clear();
+    _notesController.clear();
+
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor:  Colors.grey[900] ,
+        title: Text(
+          'إضافة مرض',
+          style: TextStyle(
+            color:  Colors.black,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _diseaseController,
+              decoration: const InputDecoration(labelText: 'اسم المرض'),
+            ),
+            TextField(
+              controller: _notesController,
+              decoration: const InputDecoration(labelText: 'ملاحظات'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await controller.addCondition(
+                _diseaseController.text.trim(),
+                _notesController.text.trim(),
+              );
+              Navigator.pop(context);
+            },
+            child: const Text('حفظ'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(MedicalCondition condition) {
+    _diseaseController.text = condition.name;
+    _notesController.text = condition.notes ?? '';
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('تعديل المرض'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _diseaseController,
+              decoration: const InputDecoration(labelText: 'اسم المرض'),
+            ),
+            TextField(
+              controller: _notesController,
+              decoration: const InputDecoration(labelText: 'ملاحظات'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await controller.updateCondition(
+                id: condition.id,
+                name: _diseaseController.text.trim(),
+                notes: _notesController.text.trim(),
+              );
+              Navigator.pop(context);
+            },
+            child: const Text('تحديث'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -41,95 +126,61 @@ class _ChronicDiseasesScreenState extends State<ChronicDiseasesScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _diseaseController,
-                    decoration: InputDecoration(
-                      hintText: "أدخل اسم المرض...",
-                      filled: true,
-                      fillColor: Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _addDisease,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.all(14),
-                  ),
-                  child: const Icon(Icons.add, color: Colors.white),
-                ),
-              ],
+            ElevatedButton.icon(
+              onPressed: _showAddDialog,
+              icon: const Icon(Icons.add),
+              label:  Text("إضافة مرض"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white24,
+              ),
             ),
             const SizedBox(height: 20),
             Expanded(
-              child: _diseases.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.medical_services_outlined,
-                            size: 50,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                           Text(
-                            "لا توجد أمراض مسجلة",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (controller.conditions.isEmpty) {
+                  return const Center(
+                    child: Text("لا توجد أمراض مسجلة"),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: controller.conditions.length,
+                  itemBuilder: (context, index) {
+                    final condition = controller.conditions[index];
+                    return Card(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                    )
-                  : ListView.builder(
-                      itemCount: _diseases.length,
-                      itemBuilder: (context, index) => Card(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: ListTile(
-                          leading: Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.deepPurple.withOpacity(0.1),
-                              shape: BoxShape.circle,
+                      child: ListTile(
+                        leading: const Icon(Icons.medical_services_outlined, color: Colors.deepPurple),
+                        title: Text(condition.name),
+                        subtitle: condition.notes != null && condition.notes!.isNotEmpty
+                            ? Text(condition.notes!)
+                            : null,
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.orange),
+                              onPressed: () => _showEditDialog(condition),
                             ),
-                            child: Icon(
-                              Icons.medical_services_outlined,
-                              color: Colors.deepPurple,
+                            IconButton(
+                              icon: const Icon(Icons.delete_outline, color: Colors.red),
+                              onPressed: () => controller.deleteCondition(condition.id),
                             ),
-                          ),
-                          title: Text(_diseases[index]),
-                          trailing: IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.red,
-                            ),
-                            onPressed: () => _removeDisease(index),
-                          ),
+                          ],
                         ),
                       ),
-                    ),
-            ),
+                    );
+                  },
+                );
+              }),
+            )
           ],
         ),
       ),
